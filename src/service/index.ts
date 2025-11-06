@@ -1,0 +1,1 @@
+export { flagsmithPlugin as default } from './plugin';
