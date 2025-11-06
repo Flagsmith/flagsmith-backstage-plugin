@@ -11,8 +11,10 @@ This plugins:
 
 Currently, it is only meant for local development, and the setup for it can be found inside the [/dev](./dev) directory.
 
-Add the following annotations to a component to link it to a flagsmith project:
+Add the following annotations to a component to link it to a flagsmith project, replacing with your Project and Organization IDs:
 
+```
 annotations:
-   flagsmith.com/project-id: "31063"
-   flagsmith.com/org-id: "23373"  # Optional, defaults to first org
+   flagsmith.com/project-id: "00000"
+   flagsmith.com/org-id: "00000"  # Optional, defaults to first org
+```
