@@ -18,3 +18,12 @@ annotations:
    flagsmith.com/project-id: "00000"
    flagsmith.com/org-id: "00000"  # Optional, defaults to first org
 ```
+
+Configure your credentials by adding the following to app-config.yaml (or your local override app-config.local.yaml):
+
+```
+# Backstage override configuration for your local development environment
+flagsmith:
+  apiUrl: https://api.flagsmith.com
+  apiToken: yourApiToken
+```
