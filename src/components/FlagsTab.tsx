@@ -19,7 +19,8 @@ import {
   Collapse,
   Chip,
 } from '@material-ui/core';
-import { KeyboardArrowDown, KeyboardArrowRight } from '@material-ui/icons';
+import KeyboardArrowDown from '@material-ui/icons/KeyboardArrowDown';
+import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 import { useEntity } from '@backstage/plugin-catalog-react';
 import {
   useApi,
@@ -118,7 +119,7 @@ const ExpandableRow = ({
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={5}>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box margin={2}>
-              {loadingDetails ? (
+              {loadingDetails && (
                 <Box display="flex" alignItems="center" p={2}>
                   <CircularProgress size={20} />
                   <Typography
@@ -129,11 +130,13 @@ const ExpandableRow = ({
                     Loading feature details...
                   </Typography>
                 </Box>
-              ) : detailsError ? (
+              )}
+              {!loadingDetails && detailsError && (
                 <Typography color="error" variant="body2">
                   {detailsError}
                 </Typography>
-              ) : (
+              )}
+              {!loadingDetails && !detailsError && (
                 <>
                   {/* Main Info Row - 4 Columns */}
                   <Grid container spacing={2}>
@@ -446,8 +449,7 @@ export const FlagsTab = () => {
   );
   const [features, setFeatures] = useState<FlagsmithFeature[]>([]);
   const [featuresLoading, setFeaturesLoading] = useState(false);
-
-  const client = new FlagsmithClient(discoveryApi, fetchApi);
+  const [client] = useState(() => new FlagsmithClient(discoveryApi, fetchApi));
 
   // Get project ID from entity annotations
   const projectId = entity.metadata.annotations?.['flagsmith.com/project-id'];
@@ -462,11 +464,11 @@ export const FlagsTab = () => {
     const fetchData = async () => {
       try {
         // Fetch project info
-        const project = await client.getProject(parseInt(projectId));
+        const project = await client.getProject(parseInt(projectId, 10));
         setProjectInfo(project);
 
         // Fetch environments
-        const envs = await client.getProjectEnvironments(parseInt(projectId));
+        const envs = await client.getProjectEnvironments(parseInt(projectId, 10));
         setEnvironments(envs);
 
         // Select first environment by default
@@ -481,7 +483,7 @@ export const FlagsTab = () => {
     };
 
     fetchData();
-  }, [projectId]);
+  }, [projectId, client]);
 
   // Fetch features when environment changes
   useEffect(() => {
@@ -501,7 +503,7 @@ export const FlagsTab = () => {
     };
 
     fetchFeaturesForEnvironment();
-  }, [selectedEnvironment, projectId]);
+  }, [selectedEnvironment, projectId, client]);
 
   // Handle environment selection change
   const handleEnvironmentChange = (envId: number) => {
@@ -568,7 +570,7 @@ export const FlagsTab = () => {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell width={50}></TableCell>
+                  <TableCell width={50} />
                   <TableCell>Flag Name</TableCell>
                   <TableCell>Status</TableCell>
                   <TableCell>Value</TableCell>

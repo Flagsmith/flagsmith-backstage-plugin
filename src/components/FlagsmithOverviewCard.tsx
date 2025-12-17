@@ -13,7 +13,8 @@ import {
   Chip,
   IconButton,
 } from '@material-ui/core';
-import { ChevronLeft, ChevronRight } from '@material-ui/icons';
+import ChevronLeft from '@material-ui/icons/ChevronLeft';
+import ChevronRight from '@material-ui/icons/ChevronRight';
 import { InfoCard } from '@backstage/core-components';
 import { useEntity } from '@backstage/plugin-catalog-react';
 import {
@@ -58,11 +59,11 @@ export const FlagsmithOverviewCard = () => {
         const client = new FlagsmithClient(discoveryApi, fetchApi);
 
         // Fetch project info
-        const project = await client.getProject(parseInt(projectId));
+        const project = await client.getProject(parseInt(projectId, 10));
         setProjectInfo(project);
 
         // Fetch environments
-        const envs = await client.getProjectEnvironments(parseInt(projectId));
+        const envs = await client.getProjectEnvironments(parseInt(projectId, 10));
         setEnvironments(envs);
 
         // Select first environment by default
@@ -89,8 +90,7 @@ export const FlagsmithOverviewCard = () => {
         // Just get project features - overview card shows basic info
         const projectFeatures = await client.getProjectFeatures(projectId);
         setFeatures(projectFeatures);
-      } catch (err) {
-        console.error('Failed to fetch features:', err);
+      } catch {
         setFeatures([]);
       }
     };

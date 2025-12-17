@@ -249,7 +249,7 @@ export class FlagsmithClient {
         liveVersion.uuid,
       );
       segmentOverrides = (featureState || []).filter(
-        s => s.feature_segment != null,
+        s => s.feature_segment !== null,
       ).length;
     }
 
