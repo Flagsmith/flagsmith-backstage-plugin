@@ -26,5 +26,5 @@ jobs:
       - name: Run lint
         run: yarn lint
 
-      - name: Build (includes TypeScript check)
-        run: yarn build
+      - name: Build (TypeScript + Bundle)
+        run: yarn build:all
