@@ -24,7 +24,7 @@
     "clean": "backstage-cli package clean",
     "prepack": "backstage-cli package prepack",
     "postpack": "backstage-cli package postpack",
-    "tsc": "tsc; if [ ! -f dist-types/src/index.d.ts ]; then echo 'TypeScript compilation failed - declaration files not generated'; exit 1; fi",
+    "tsc": "tsc || test -f dist-types/src/index.d.ts",
     "build:all": "yarn tsc && backstage-cli package build",
     "prepare": "husky"
   },
