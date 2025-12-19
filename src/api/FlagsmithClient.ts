@@ -60,11 +60,24 @@ export interface FlagsmithFeatureVersion {
   published_by?: string | null;
 }
 
+export interface FlagsmithFeatureStateValue {
+  string_value?: string | null;
+  integer_value?: number | null;
+  boolean_value?: boolean | null;
+}
+
+export interface FlagsmithFeatureSegment {
+  segment: number;
+  priority: number;
+}
+
 export interface FlagsmithFeatureState {
   id: number;
   enabled: boolean;
-  feature_segment?: number | null;
-  feature_state_value?: string | null;
+  environment?: number;
+  feature_segment?: FlagsmithFeatureSegment | null;
+  feature_state_value?: FlagsmithFeatureStateValue | null;
+  updated_at?: string | null;
 }
 
 export interface FlagsmithFeatureDetails {
