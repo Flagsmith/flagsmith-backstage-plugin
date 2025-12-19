@@ -978,7 +978,7 @@
     i18next "^22.4.15"
     zen-observable "^0.10.0"
 
-"@backstage/theme@^0.7.0", "@backstage/theme@^0.7.1":
+"@backstage/theme@^0.7.1":
   version "0.7.1"
   resolved "https://registry.yarnpkg.com/@backstage/theme/-/theme-0.7.1.tgz#e187a6aeba11a72a26e480639c6a4365e899dfa3"
   integrity sha512-JC2EUqfV198SzNT0B/E7MrnQuR5ML3qCz1FMDNd1qGoXNRBtBsSlPPJMcmuRsz7tM2BN+Vnbr7KkRPNbEnCYkQ==
