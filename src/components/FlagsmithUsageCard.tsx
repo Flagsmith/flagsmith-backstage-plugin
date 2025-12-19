@@ -4,6 +4,7 @@ import {
   Box,
   CircularProgress,
 } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
 import { InfoCard } from '@backstage/core-components';
 import { useEntity } from '@backstage/plugin-catalog-react';
 import { useApi, discoveryApiRef, fetchApiRef } from '@backstage/core-plugin-api';
@@ -17,6 +18,16 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
+import { FlagsmithLink } from './shared';
+import { flagsmithColors, FLAGSMITH_DASHBOARD_URL } from '../theme/flagsmithTheme';
+
+const useStyles = makeStyles(theme => ({
+  headerActions: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing(1),
+  },
+}));
 
 interface CustomTooltipProps {
   active?: boolean;
@@ -66,6 +77,7 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
 };
 
 export const FlagsmithUsageCard = () => {
+  const classes = useStyles();
   const { entity } = useEntity();
   const discoveryApi = useApi(discoveryApiRef);
   const fetchApi = useApi(fetchApiRef);
@@ -78,6 +90,9 @@ export const FlagsmithUsageCard = () => {
   // Get project ID and org ID from entity annotations
   const projectId = entity.metadata.annotations?.['flagsmith.com/project-id'];
   const orgId = entity.metadata.annotations?.['flagsmith.com/org-id'];
+
+  // Build usage analytics URL
+  const usageUrl = `${FLAGSMITH_DASHBOARD_URL}/organisation/${orgId}/usage`;
 
   useEffect(() => {
     if (!projectId || !orgId) {
@@ -141,7 +156,14 @@ export const FlagsmithUsageCard = () => {
   return (
     <InfoCard
       title="Flags Usage Data (30 Days)"
-      subheader={projectInfo?.name ? `${projectInfo.name} - ${totalFlags} total flag calls` : undefined}
+      subheader={projectInfo?.name ? `${projectInfo.name} - ${totalFlags.toLocaleString()} total flag calls` : undefined}
+      action={
+        orgId && (
+          <Box className={classes.headerActions}>
+            <FlagsmithLink href={usageUrl} iconOnly tooltip="View Usage Analytics" />
+          </Box>
+        )
+      }
     >
       <Box p={2}>
         <ResponsiveContainer width="100%" height={300}>
@@ -162,7 +184,7 @@ export const FlagsmithUsageCard = () => {
             />
             <YAxis />
             <Tooltip content={<CustomTooltip />} />
-            <Bar dataKey="flags" fill="#3f51b5" />
+            <Bar dataKey="flags" fill={flagsmithColors.primary} radius={[2, 2, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
 
