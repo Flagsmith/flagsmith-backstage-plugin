@@ -137,15 +137,6 @@ export class FlagsmithClient {
     return data.results || data;
   }
 
-  async getEnvironmentFeatures(
-    _environmentId: number,
-    projectId: string,
-  ): Promise<FlagsmithFeature[]> {
-    // With proxy approach, we just get project features
-    // Details are loaded lazily on accordion expand
-    return this.getProjectFeatures(projectId);
-  }
-
   async getProjectEnvironments(
     projectId: number,
   ): Promise<FlagsmithEnvironment[]> {
