@@ -379,25 +379,25 @@ const ExpandableRow = ({
                               {/* Feature State Value */}
                               {state.feature_state_value && (
                                 <Box mt={1}>
-                                  {state.feature_state_value.string_value !==
-                                    null && (
+                                  {state.feature_state_value.string_value !== null &&
+                                    state.feature_state_value.string_value !== undefined && (
                                     <Typography variant="body2">
                                       <strong>Value:</strong>{' '}
                                       {state.feature_state_value.string_value}
                                     </Typography>
                                   )}
-                                  {state.feature_state_value.integer_value !==
-                                    null && (
+                                  {state.feature_state_value.integer_value !== null &&
+                                    state.feature_state_value.integer_value !== undefined && (
                                     <Typography variant="body2">
                                       <strong>Value:</strong>{' '}
                                       {state.feature_state_value.integer_value}
                                     </Typography>
                                   )}
-                                  {state.feature_state_value.boolean_value !==
-                                    null && (
+                                  {state.feature_state_value.boolean_value !== null &&
+                                    state.feature_state_value.boolean_value !== undefined && (
                                     <Typography variant="body2">
                                       <strong>Value:</strong>{' '}
-                                      {state.feature_state_value.boolean_value.toString()}
+                                      {String(state.feature_state_value.boolean_value)}
                                     </Typography>
                                   )}
                                 </Box>
