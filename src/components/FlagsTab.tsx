@@ -58,19 +58,6 @@ const useStyles = makeStyles(theme => ({
     border: `1px solid ${theme.palette.divider}`,
     borderRadius: theme.shape.borderRadius,
   },
-  legend: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: theme.spacing(2),
-    marginTop: theme.spacing(1),
-    fontSize: '0.75rem',
-    color: theme.palette.text.secondary,
-  },
-  legendItem: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: theme.spacing(0.5),
-  },
   showMoreButton: {
     display: 'flex',
     alignItems: 'center',
@@ -557,10 +544,6 @@ export const FlagsTab = () => {
     );
   }, [features, searchQuery]);
 
-  // Count enabled/disabled
-  const enabledCount = features.filter(f => f.default_enabled).length;
-  const disabledCount = features.length - enabledCount;
-
   // Build project dashboard URL
   const dashboardUrl = buildProjectUrl(
     projectId || '',
@@ -598,17 +581,6 @@ export const FlagsTab = () => {
           <Typography variant="body2" color="textSecondary">
             {projectInfo?.name} ({features.length} flags)
           </Typography>
-          {/* Summary stats */}
-          <Box className={classes.legend}>
-            <Box className={classes.legendItem}>
-              <FlagStatusIndicator enabled size="small" />
-              <span>{enabledCount} Enabled</span>
-            </Box>
-            <Box className={classes.legendItem}>
-              <FlagStatusIndicator enabled={false} size="small" />
-              <span>{disabledCount} Disabled</span>
-            </Box>
-          </Box>
         </Grid>
         <Grid item xs={12} md={6}>
           <Box className={classes.headerActions}>
