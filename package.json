@@ -26,6 +26,8 @@
     "postpack": "backstage-cli package postpack",
     "tsc": "tsc || test -f dist-types/src/index.d.ts",
     "build:all": "yarn tsc && backstage-cli package build",
+    "build:demo": "vite build --config vite.config.demo.ts && cp public/mockServiceWorker.js dist-demo/",
+    "preview:demo": "vite preview --config vite.config.demo.ts",
     "prepare": "husky"
   },
   "lint-staged": {
@@ -58,12 +60,14 @@
     "@testing-library/jest-dom": "^6.0.0",
     "@testing-library/react": "^14.0.0",
     "@testing-library/user-event": "^14.0.0",
+    "@vitejs/plugin-react": "^4.3.4",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "msw": "^1.0.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
-    "react-router-dom": "^6.0.0"
+    "react-router-dom": "^6.0.0",
+    "vite": "^6.0.5"
   },
   "files": [
     "dist"
