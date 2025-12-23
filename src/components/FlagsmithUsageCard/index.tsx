@@ -1,8 +1,8 @@
-import { Typography, Box, CircularProgress } from '@material-ui/core';
+import { Typography, Box } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { InfoCard } from '@backstage/core-components';
 import { useEntity } from '@backstage/plugin-catalog-react';
-import { FlagsmithLink } from '../shared';
+import { FlagsmithLink, LoadingState } from '../shared';
 import { FLAGSMITH_DASHBOARD_URL } from '../../theme/flagsmithTheme';
 import { useFlagsmithUsage } from '../../hooks';
 import { UsageChart } from './UsageChart';
@@ -32,9 +32,7 @@ export const FlagsmithUsageCard = () => {
   if (loading) {
     return (
       <InfoCard title="Flags Usage Data (30 Days)">
-        <Box display="flex" justifyContent="center" p={2}>
-          <CircularProgress />
-        </Box>
+        <LoadingState message="Loading usage data..." size={24} />
       </InfoCard>
     );
   }

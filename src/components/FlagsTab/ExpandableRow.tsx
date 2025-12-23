@@ -93,7 +93,12 @@ export const ExpandableRow = ({
     <>
       <TableRow hover>
         <TableCell padding="checkbox">
-          <IconButton size="small" onClick={handleToggle}>
+          <IconButton
+            size="small"
+            onClick={handleToggle}
+            aria-label={open ? `Collapse ${feature.name}` : `Expand ${feature.name}`}
+            aria-expanded={open}
+          >
             {open ? <KeyboardArrowDown /> : <KeyboardArrowRight />}
           </IconButton>
         </TableCell>

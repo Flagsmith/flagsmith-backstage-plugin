@@ -53,8 +53,9 @@ export const FlagsmithLink = ({
           target="_blank"
           rel="noopener noreferrer"
           size="small"
+          aria-label={tooltip}
         >
-          <LaunchIcon fontSize="small" />
+          <LaunchIcon fontSize="small" aria-hidden="true" />
         </IconButton>
       </Tooltip>
     );
@@ -67,9 +68,10 @@ export const FlagsmithLink = ({
         href={href}
         target="_blank"
         rel="noopener noreferrer"
+        aria-label={`${tooltip} (opens in new tab)`}
       >
         {children}
-        <LaunchIcon className={classes.icon} />
+        <LaunchIcon className={classes.icon} aria-hidden="true" />
       </Link>
     </Tooltip>
   );

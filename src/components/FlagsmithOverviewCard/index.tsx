@@ -2,7 +2,6 @@ import { useState } from 'react';
 import {
   Typography,
   Box,
-  CircularProgress,
   Table,
   TableBody,
   TableCell,
@@ -15,13 +14,12 @@ import {
 import { makeStyles } from '@material-ui/core/styles';
 import { InfoCard } from '@backstage/core-components';
 import { useEntity } from '@backstage/plugin-catalog-react';
-import { FlagsmithLink } from '../shared';
+import { FlagsmithLink, MiniPagination, LoadingState } from '../shared';
 import { buildProjectUrl } from '../../theme/flagsmithTheme';
 import { useFlagsmithProject } from '../../hooks';
 import { calculateFeatureStats, paginate } from '../../utils';
 import { FlagStatsRow } from './FlagStatsRow';
 import { FeatureFlagRow } from './FeatureFlagRow';
-import { MiniPagination } from './MiniPagination';
 
 const useStyles = makeStyles(theme => ({
   headerActions: {
@@ -44,9 +42,7 @@ export const FlagsmithOverviewCard = () => {
   if (loading) {
     return (
       <InfoCard title="Flagsmith Flags">
-        <Box display="flex" justifyContent="center" p={2}>
-          <CircularProgress />
-        </Box>
+        <LoadingState message="Loading flags..." size={24} />
       </InfoCard>
     );
   }

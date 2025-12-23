@@ -68,10 +68,14 @@ export const SearchInput = ({
       placeholder={placeholder}
       value={localValue}
       onChange={e => handleChange(e.target.value)}
+      inputProps={{
+        'aria-label': placeholder,
+        role: 'searchbox',
+      }}
       InputProps={{
         startAdornment: (
           <InputAdornment position="start">
-            <SearchIcon color="action" />
+            <SearchIcon color="action" aria-hidden="true" />
           </InputAdornment>
         ),
         endAdornment: localValue ? (
@@ -80,6 +84,7 @@ export const SearchInput = ({
               className={classes.clearButton}
               onClick={handleClear}
               size="small"
+              aria-label="Clear search"
             >
               <ClearIcon fontSize="small" />
             </IconButton>

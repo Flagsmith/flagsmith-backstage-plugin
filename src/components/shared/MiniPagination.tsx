@@ -29,6 +29,8 @@ export const MiniPagination = ({
       p={1}
       borderTop={1}
       borderColor="divider"
+      role="navigation"
+      aria-label={`Pagination for ${itemLabel}`}
     >
       <Typography variant="caption" color="textSecondary">
         Page {page + 1} of {totalPages} ({totalItems} {itemLabel})
@@ -38,6 +40,7 @@ export const MiniPagination = ({
           size="small"
           onClick={onPrevious}
           disabled={page === 0}
+          aria-label="Previous page"
         >
           <ChevronLeft />
         </IconButton>
@@ -45,6 +48,7 @@ export const MiniPagination = ({
           size="small"
           onClick={onNext}
           disabled={page >= totalPages - 1}
+          aria-label="Next page"
         >
           <ChevronRight />
         </IconButton>

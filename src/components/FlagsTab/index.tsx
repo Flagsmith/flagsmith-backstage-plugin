@@ -2,7 +2,6 @@ import { useState, useMemo } from 'react';
 import {
   Typography,
   Box,
-  CircularProgress,
   Grid,
   Table,
   TableBody,
@@ -14,7 +13,7 @@ import {
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { useEntity } from '@backstage/plugin-catalog-react';
-import { SearchInput, FlagsmithLink } from '../shared';
+import { SearchInput, FlagsmithLink, LoadingState } from '../shared';
 import { buildProjectUrl } from '../../theme/flagsmithTheme';
 import { useFlagsmithProject } from '../../hooks';
 import { ExpandableRow } from './ExpandableRow';
@@ -56,11 +55,7 @@ export const FlagsTab = () => {
   );
 
   if (loading) {
-    return (
-      <Box p={3} display="flex" justifyContent="center">
-        <CircularProgress />
-      </Box>
-    );
+    return <LoadingState message="Loading feature flags..." />;
   }
 
   if (error) {
