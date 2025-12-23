@@ -64,9 +64,3 @@ const flagsmithPlugin = createFrontendPlugin({
 });
 
 export default flagsmithPlugin;
-export { flagsmithPlugin };
-
-// Export components for users who need direct access
-export { FlagsTab } from './components/FlagsTab';
-export { FlagsmithOverviewCard } from './components/FlagsmithOverviewCard';
-export { FlagsmithUsageCard } from './components/FlagsmithUsageCard';
