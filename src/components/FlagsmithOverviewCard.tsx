@@ -11,14 +11,22 @@ import {
   TableRow,
   Paper,
   Chip,
-  Badge,
   IconButton,
 } from '@material-ui/core';
-import { ChevronLeft, ChevronRight } from '@material-ui/icons';
+import ChevronLeft from '@material-ui/icons/ChevronLeft';
+import ChevronRight from '@material-ui/icons/ChevronRight';
 import { InfoCard } from '@backstage/core-components';
 import { useEntity } from '@backstage/plugin-catalog-react';
-import { useApi, discoveryApiRef, fetchApiRef } from '@backstage/core-plugin-api';
-import { FlagsmithClient, FlagsmithFeature, FlagsmithEnvironment } from '../api/FlagsmithClient';
+import {
+  useApi,
+  discoveryApiRef,
+  fetchApiRef,
+} from '@backstage/core-plugin-api';
+import {
+  FlagsmithClient,
+  FlagsmithFeature,
+  FlagsmithEnvironment,
+} from '../api/FlagsmithClient';
 
 export const FlagsmithOverviewCard = () => {
   const { entity } = useEntity();
@@ -30,7 +38,9 @@ export const FlagsmithOverviewCard = () => {
   const [projectInfo, setProjectInfo] = useState<any>(null);
   const [features, setFeatures] = useState<FlagsmithFeature[]>([]);
   const [environments, setEnvironments] = useState<FlagsmithEnvironment[]>([]);
-  const [selectedEnvironment, setSelectedEnvironment] = useState<number | null>(null);
+  const [selectedEnvironment, setSelectedEnvironment] = useState<number | null>(
+    null,
+  );
   const [page, setPage] = useState(0);
   const pageSize = 5;
 
@@ -49,18 +59,17 @@ export const FlagsmithOverviewCard = () => {
         const client = new FlagsmithClient(discoveryApi, fetchApi);
 
         // Fetch project info
-        const project = await client.getProject(parseInt(projectId));
+        const project = await client.getProject(parseInt(projectId, 10));
         setProjectInfo(project);
 
         // Fetch environments
-        const envs = await client.getProjectEnvironments(parseInt(projectId));
+        const envs = await client.getProjectEnvironments(parseInt(projectId, 10));
         setEnvironments(envs);
 
         // Select first environment by default
         if (envs.length > 0) {
           setSelectedEnvironment(envs[0].id);
         }
-
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Unknown error');
       } finally {
@@ -78,10 +87,10 @@ export const FlagsmithOverviewCard = () => {
     const fetchFeaturesForEnvironment = async () => {
       try {
         const client = new FlagsmithClient(discoveryApi, fetchApi);
-        const envFeatures = await client.getEnvironmentFeatures(selectedEnvironment, projectId);
-        setFeatures(envFeatures);
-      } catch (err) {
-        console.error('Failed to fetch environment features:', err);
+        // Just get project features - overview card shows basic info
+        const projectFeatures = await client.getProjectFeatures(projectId);
+        setFeatures(projectFeatures);
+      } catch {
         setFeatures([]);
       }
     };
@@ -103,15 +112,16 @@ export const FlagsmithOverviewCard = () => {
     return (
       <InfoCard title="Flagsmith Flags">
         <Box p={2}>
-          <Typography color="error">
-            Error: {error}
-          </Typography>
+          <Typography color="error">Error: {error}</Typography>
         </Box>
       </InfoCard>
     );
   }
 
-  const paginatedFeatures = features.slice(page * pageSize, (page + 1) * pageSize);
+  const paginatedFeatures = features.slice(
+    page * pageSize,
+    (page + 1) * pageSize,
+  );
   const totalPages = Math.ceil(features.length / pageSize);
 
   return (
@@ -121,7 +131,7 @@ export const FlagsmithOverviewCard = () => {
           <TableHead>
             <TableRow>
               <TableCell>Flag Name</TableCell>
-              <TableCell>Status</TableCell>
+              <TableCell>Default</TableCell>
               <TableCell align="right">Environment</TableCell>
             </TableRow>
           </TableHead>
@@ -135,7 +145,7 @@ export const FlagsmithOverviewCard = () => {
                 </TableCell>
               </TableRow>
             ) : (
-              paginatedFeatures.map((feature) => (
+              paginatedFeatures.map(feature => (
                 <TableRow key={feature.id} hover>
                   <TableCell>
                     <Typography variant="body2">{feature.name}</Typography>
@@ -147,21 +157,16 @@ export const FlagsmithOverviewCard = () => {
                     )}
                   </TableCell>
                   <TableCell>
-                    <Badge
-                      badgeContent={(feature.num_segment_overrides ?? 0) > 0 ? feature.num_segment_overrides : null}
-                      color="secondary"
-                      overlap="rectangular"
-                    >
-                      <Chip
-                        label={feature.environment_state?.[0]?.enabled ? "Enabled" : "Disabled"}
-                        color={feature.environment_state?.[0]?.enabled ? "primary" : "default"}
-                        size="small"
-                      />
-                    </Badge>
+                    <Chip
+                      label={feature.default_enabled ? 'Enabled' : 'Disabled'}
+                      color={feature.default_enabled ? 'primary' : 'default'}
+                      size="small"
+                    />
                   </TableCell>
                   <TableCell align="right">
                     <Typography variant="caption" color="textSecondary">
-                      {environments.find(env => env.id === selectedEnvironment)?.name || 'Unknown'}
+                      {environments.find(env => env.id === selectedEnvironment)
+                        ?.name || 'Unknown'}
                     </Typography>
                   </TableCell>
                 </TableRow>
@@ -173,7 +178,14 @@ export const FlagsmithOverviewCard = () => {
 
       {/* Mini Pager */}
       {totalPages > 1 && (
-        <Box display="flex" justifyContent="space-between" alignItems="center" p={1} borderTop={1} borderColor="divider">
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+          p={1}
+          borderTop={1}
+          borderColor="divider"
+        >
           <Typography variant="caption" color="textSecondary">
             Page {page + 1} of {totalPages} ({features.length} flags)
           </Typography>

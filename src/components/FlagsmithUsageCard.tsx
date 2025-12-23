@@ -91,11 +91,11 @@ export const FlagsmithUsageCard = () => {
         const client = new FlagsmithClient(discoveryApi, fetchApi);
 
         // Fetch project info
-        const project = await client.getProject(parseInt(projectId));
+        const project = await client.getProject(parseInt(projectId, 10));
         setProjectInfo(project);
 
         // Fetch usage data
-        const usage = await client.getUsageData(parseInt(orgId), parseInt(projectId));
+        const usage = await client.getUsageData(parseInt(orgId, 10), parseInt(projectId, 10));
         setUsageData(usage);
 
       } catch (err) {
