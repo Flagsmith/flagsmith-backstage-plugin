@@ -41,6 +41,14 @@ const mockFeatures = [
     is_archived: false,
     tags: ['ui', 'theme'],
     owners: [{ id: 1, name: 'John Doe', email: 'john@example.com' }],
+    num_segment_overrides: 1,
+    num_identity_overrides: 5,
+    // Multi-environment status
+    environment_state: [
+      { id: 101, enabled: true },   // Dev - enabled
+      { id: 102, enabled: true },   // Staging - enabled
+      { id: 103, enabled: false },  // Prod - disabled (not yet rolled out)
+    ],
   },
   {
     id: 1002,
@@ -53,6 +61,13 @@ const mockFeatures = [
     is_archived: false,
     tags: ['checkout', 'experiment'],
     owners: [{ id: 2, name: 'Jane Smith', email: 'jane@example.com' }],
+    num_segment_overrides: 2,
+    num_identity_overrides: 0,
+    environment_state: [
+      { id: 101, enabled: true },   // Dev - enabled
+      { id: 102, enabled: false },  // Staging - disabled
+      { id: 103, enabled: false },  // Prod - disabled
+    ],
   },
   {
     id: 1003,
@@ -65,6 +80,13 @@ const mockFeatures = [
     is_archived: false,
     tags: ['api', 'performance'],
     owners: [],
+    num_segment_overrides: 0,
+    num_identity_overrides: 0,
+    environment_state: [
+      { id: 101, enabled: true },   // Dev - enabled
+      { id: 102, enabled: true },   // Staging - enabled
+      { id: 103, enabled: true },   // Prod - enabled
+    ],
   },
   {
     id: 1004,
@@ -77,6 +99,13 @@ const mockFeatures = [
     is_archived: false,
     tags: ['beta'],
     owners: [{ id: 1, name: 'John Doe', email: 'john@example.com' }],
+    num_segment_overrides: 3,
+    num_identity_overrides: 12,
+    environment_state: [
+      { id: 101, enabled: true },   // Dev - enabled
+      { id: 102, enabled: true },   // Staging - enabled
+      { id: 103, enabled: true },   // Prod - enabled (for beta users only via segment)
+    ],
   },
   {
     id: 1005,
@@ -89,6 +118,13 @@ const mockFeatures = [
     is_archived: false,
     tags: ['ops'],
     owners: [],
+    num_segment_overrides: 0,
+    num_identity_overrides: 0,
+    environment_state: [
+      { id: 101, enabled: false },  // Dev - disabled
+      { id: 102, enabled: false },  // Staging - disabled
+      { id: 103, enabled: false },  // Prod - disabled
+    ],
   },
 ];
 
@@ -142,23 +178,86 @@ const mockFeatureVersions: Record<number, any[]> = {
 
 const mockFeatureStates: Record<string, any[]> = {
   'v1-dark-mode-uuid': [
-    { id: 2001, enabled: true, feature_segment: null, feature_state_value: null },
-    { id: 2002, enabled: true, feature_segment: 501, feature_state_value: null }, // Segment override
+    {
+      id: 2001,
+      enabled: true,
+      environment: 101,
+      feature_segment: null,
+      feature_state_value: { string_value: 'dark', integer_value: null, boolean_value: null },
+      updated_at: '2024-12-01T10:00:00Z',
+    },
+    {
+      id: 2002,
+      enabled: true,
+      environment: 101,
+      feature_segment: { segment: 501, priority: 1 },
+      feature_state_value: { string_value: 'auto', integer_value: null, boolean_value: null },
+      updated_at: '2024-12-05T14:30:00Z',
+    },
   ],
   'v1-checkout-uuid': [
-    { id: 2003, enabled: false, feature_segment: null, feature_state_value: null },
-    { id: 2004, enabled: true, feature_segment: 502, feature_state_value: null }, // Beta users segment
+    {
+      id: 2003,
+      enabled: false,
+      environment: 101,
+      feature_segment: null,
+      feature_state_value: null,
+      updated_at: '2024-03-15T09:00:00Z',
+    },
+    {
+      id: 2004,
+      enabled: true,
+      environment: 101,
+      feature_segment: { segment: 502, priority: 1 },
+      feature_state_value: { string_value: null, integer_value: null, boolean_value: true },
+      updated_at: '2024-03-20T11:00:00Z',
+    },
   ],
   'v1-rate-limit-uuid': [
-    { id: 2005, enabled: true, feature_segment: null, feature_state_value: '1000' },
+    {
+      id: 2005,
+      enabled: true,
+      environment: 101,
+      feature_segment: null,
+      feature_state_value: { string_value: null, integer_value: 1000, boolean_value: null },
+      updated_at: '2024-01-21T00:00:00Z',
+    },
   ],
   'v1-beta-uuid': [
-    { id: 2006, enabled: false, feature_segment: null, feature_state_value: null },
-    { id: 2007, enabled: true, feature_segment: 503, feature_state_value: null }, // Beta testers
-    { id: 2008, enabled: true, feature_segment: 504, feature_state_value: null }, // Internal users
+    {
+      id: 2006,
+      enabled: false,
+      environment: 101,
+      feature_segment: null,
+      feature_state_value: null,
+      updated_at: '2024-04-05T16:45:00Z',
+    },
+    {
+      id: 2007,
+      enabled: true,
+      environment: 101,
+      feature_segment: { segment: 503, priority: 1 },
+      feature_state_value: null,
+      updated_at: '2024-04-10T12:00:00Z',
+    },
+    {
+      id: 2008,
+      enabled: true,
+      environment: 101,
+      feature_segment: { segment: 504, priority: 2 },
+      feature_state_value: null,
+      updated_at: '2024-04-12T09:00:00Z',
+    },
   ],
   'v1-maintenance-uuid': [
-    { id: 2009, enabled: false, feature_segment: null, feature_state_value: null },
+    {
+      id: 2009,
+      enabled: false,
+      environment: 101,
+      feature_segment: null,
+      feature_state_value: { string_value: 'Scheduled maintenance', integer_value: null, boolean_value: null },
+      updated_at: '2024-02-28T08:00:00Z',
+    },
   ],
 };
 
