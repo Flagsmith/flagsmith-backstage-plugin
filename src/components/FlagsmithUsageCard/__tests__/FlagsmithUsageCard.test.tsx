@@ -1,4 +1,4 @@
-
+import { ReactNode } from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import { FlagsmithUsageCard } from '../index';
 import {
@@ -14,7 +14,7 @@ jest.mock('recharts', () => {
   const OriginalModule = jest.requireActual('recharts');
   return {
     ...OriginalModule,
-    ResponsiveContainer: ({ children }: { children: React.ReactNode }) => (
+    ResponsiveContainer: ({ children }: { children: ReactNode }) => (
       <div data-testid="responsive-container" style={{ width: 400, height: 200 }}>
         {children}
       </div>
@@ -153,8 +153,9 @@ describe('FlagsmithUsageCard', () => {
       expect(screen.queryByText('Loading usage data...')).not.toBeInTheDocument();
     });
 
-    const analyticsButton = screen.getByRole('button', { name: /view usage analytics/i });
-    expect(analyticsButton).toBeInTheDocument();
+    // MUI IconButton with component="a" renders as link role
+    const analyticsLink = screen.getByRole('link', { name: /view usage analytics/i });
+    expect(analyticsLink).toBeInTheDocument();
   });
 
   it('handles empty usage data', async () => {
@@ -169,8 +170,8 @@ describe('FlagsmithUsageCard', () => {
       expect(screen.queryByText('Loading usage data...')).not.toBeInTheDocument();
     });
 
-    // Should show 0 total
-    expect(screen.getByText(/0/)).toBeInTheDocument();
+    // Should show 0 total flag calls
+    expect(screen.getByText(/0 total flag calls/)).toBeInTheDocument();
   });
 
   it('handles usage data with null flags', async () => {
