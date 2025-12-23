@@ -94,11 +94,10 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout gh-pages branch
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: gh-pages
-          path: gh-pages
+          fetch-depth: 0
 
       - name: Download artifact
         uses: actions/download-artifact@v4
@@ -108,17 +107,31 @@ jobs:
 
       - name: Deploy PR preview
         run: |
-          PR_DIR="gh-pages/pr-${{ github.event.pull_request.number }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Check if gh-pages branch exists
+          if git ls-remote --heads origin gh-pages | grep -q gh-pages; then
+            git fetch origin gh-pages
+            git checkout gh-pages
+          else
+            # Create orphan gh-pages branch if it doesn't exist
+            git checkout --orphan gh-pages
+            git rm -rf .
+            echo "# GitHub Pages" > README.md
+            git add README.md
+            git commit -m "Initialize gh-pages branch"
+          fi
+
+          # Deploy PR preview
+          PR_DIR="pr-${{ github.event.pull_request.number }}"
           rm -rf "$PR_DIR"
           mkdir -p "$PR_DIR"
           cp -r dist-demo/* "$PR_DIR/"
 
-          cd gh-pages
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
           git add .
           git diff --staged --quiet || git commit -m "Deploy PR #${{ github.event.pull_request.number }} preview"
-          git push
+          git push origin gh-pages
 
       - name: Comment on PR
         uses: actions/github-script@v7
@@ -161,19 +174,28 @@ jobs:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout gh-pages branch
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: gh-pages
+          fetch-depth: 0
 
       - name: Remove PR preview
         run: |
+          # Check if gh-pages branch exists
+          if ! git ls-remote --heads origin gh-pages | grep -q gh-pages; then
+            echo "gh-pages branch does not exist, nothing to clean up"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin gh-pages
+          git checkout gh-pages
+
           PR_DIR="pr-${{ github.event.pull_request.number }}"
           if [ -d "$PR_DIR" ]; then
             rm -rf "$PR_DIR"
-            git config user.name "github-actions[bot]"
-            git config user.email "github-actions[bot]@users.noreply.github.com"
             git add .
             git diff --staged --quiet || git commit -m "Remove PR #${{ github.event.pull_request.number }} preview"
-            git push
+            git push origin gh-pages
           fi
