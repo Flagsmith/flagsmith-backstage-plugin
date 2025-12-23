@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Typography,
   Box,
@@ -14,19 +14,9 @@ import {
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { useEntity } from '@backstage/plugin-catalog-react';
-import {
-  useApi,
-  discoveryApiRef,
-  fetchApiRef,
-} from '@backstage/core-plugin-api';
-import {
-  FlagsmithClient,
-  FlagsmithEnvironment,
-  FlagsmithFeature,
-  FlagsmithProject,
-} from '../../api/FlagsmithClient';
 import { SearchInput, FlagsmithLink } from '../shared';
 import { buildProjectUrl } from '../../theme/flagsmithTheme';
+import { useFlagsmithProject } from '../../hooks';
 import { ExpandableRow } from './ExpandableRow';
 
 const useStyles = makeStyles(theme => ({
@@ -44,45 +34,11 @@ const useStyles = makeStyles(theme => ({
 export const FlagsTab = () => {
   const classes = useStyles();
   const { entity } = useEntity();
-  const discoveryApi = useApi(discoveryApiRef);
-  const fetchApi = useApi(fetchApiRef);
-
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [projectInfo, setProjectInfo] = useState<FlagsmithProject | null>(null);
-  const [environments, setEnvironments] = useState<FlagsmithEnvironment[]>([]);
-  const [features, setFeatures] = useState<FlagsmithFeature[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [client] = useState(() => new FlagsmithClient(discoveryApi, fetchApi));
 
   const projectId = entity.metadata.annotations?.['flagsmith.com/project-id'];
-
-  useEffect(() => {
-    if (!projectId) {
-      setError('No Flagsmith project ID found in entity annotations');
-      setLoading(false);
-      return;
-    }
-
-    const fetchData = async () => {
-      try {
-        const project = await client.getProject(parseInt(projectId, 10));
-        setProjectInfo(project);
-
-        const envs = await client.getProjectEnvironments(parseInt(projectId, 10));
-        setEnvironments(envs);
-
-        const projectFeatures = await client.getProjectFeatures(projectId);
-        setFeatures(projectFeatures);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Unknown error');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [projectId, client]);
+  const { project, environments, features, loading, error, client } =
+    useFlagsmithProject(projectId);
 
   const filteredFeatures = useMemo(() => {
     if (!searchQuery.trim()) return features;
@@ -127,7 +83,7 @@ export const FlagsTab = () => {
         <Grid item xs={12} md={6}>
           <Typography variant="h4">Feature Flags</Typography>
           <Typography variant="body2" color="textSecondary">
-            {projectInfo?.name} ({features.length} flags)
+            {project?.name} ({features.length} flags)
           </Typography>
         </Grid>
         <Grid item xs={12} md={6}>

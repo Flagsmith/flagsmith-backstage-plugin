@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useApi, discoveryApiRef, fetchApiRef } from '@backstage/core-plugin-api';
 import {
   FlagsmithClient,
@@ -13,6 +13,7 @@ export interface UseFlagsmithProjectResult {
   features: FlagsmithFeature[];
   loading: boolean;
   error: string | null;
+  client: FlagsmithClient;
 }
 
 export function useFlagsmithProject(
@@ -20,6 +21,11 @@ export function useFlagsmithProject(
 ): UseFlagsmithProjectResult {
   const discoveryApi = useApi(discoveryApiRef);
   const fetchApi = useApi(fetchApiRef);
+
+  const client = useMemo(
+    () => new FlagsmithClient(discoveryApi, fetchApi),
+    [discoveryApi, fetchApi],
+  );
 
   const [project, setProject] = useState<FlagsmithProject | null>(null);
   const [environments, setEnvironments] = useState<FlagsmithEnvironment[]>([]);
@@ -36,8 +42,6 @@ export function useFlagsmithProject(
 
     const fetchData = async () => {
       try {
-        const client = new FlagsmithClient(discoveryApi, fetchApi);
-
         const projectData = await client.getProject(parseInt(projectId, 10));
         setProject(projectData);
 
@@ -54,7 +58,7 @@ export function useFlagsmithProject(
     };
 
     fetchData();
-  }, [projectId, discoveryApi, fetchApi]);
+  }, [projectId, client]);
 
-  return { project, environments, features, loading, error };
+  return { project, environments, features, loading, error, client };
 }
