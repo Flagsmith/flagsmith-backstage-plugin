@@ -3,20 +3,26 @@ name: Deploy Demo
 on:
   push:
     branches: [main]
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
+  pull-requests: write
   pages: write
   id-token: write
 
 concurrency:
-  group: "pages"
-  cancel-in-progress: false
+  group: 'pages-${{ github.event.pull_request.number || github.ref }}'
+  cancel-in-progress: true
 
 jobs:
   build:
+    if: github.event.action != 'closed'
     runs-on: ubuntu-latest
+    outputs:
+      preview_url: ${{ steps.set-url.outputs.url }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -30,24 +36,144 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
+      - name: Determine base path
+        id: base-path
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "path=/flagsmith-backstage-plugin/pr-${{ github.event.pull_request.number }}/" >> $GITHUB_OUTPUT
+          else
+            echo "path=/flagsmith-backstage-plugin/" >> $GITHUB_OUTPUT
+          fi
+
       - name: Build demo
         run: yarn build:demo
+        env:
+          VITE_BASE_PATH: ${{ steps.base-path.outputs.path }}
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
+      - name: Set preview URL
+        id: set-url
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "url=https://${{ github.repository_owner }}.github.io/flagsmith-backstage-plugin/pr-${{ github.event.pull_request.number }}/" >> $GITHUB_OUTPUT
+          fi
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
+          name: demo-build
           path: ./dist-demo
 
-  deploy:
+  deploy-main:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: demo-build
+          path: ./dist-demo
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload to Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist-demo
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  deploy-pr-preview:
+    if: github.event_name == 'pull_request' && github.event.action != 'closed'
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: demo-build
+          path: ./dist-demo
+
+      - name: Deploy PR preview
+        run: |
+          PR_DIR="gh-pages/pr-${{ github.event.pull_request.number }}"
+          rm -rf "$PR_DIR"
+          mkdir -p "$PR_DIR"
+          cp -r dist-demo/* "$PR_DIR/"
+
+          cd gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git diff --staged --quiet || git commit -m "Deploy PR #${{ github.event.pull_request.number }} preview"
+          git push
+
+      - name: Comment on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const url = '${{ needs.build.outputs.preview_url }}';
+            const body = `## Demo Preview
+
+            Preview URL: ${url}
+
+            This preview will be automatically cleaned up when the PR is closed.`;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.find(c =>
+              c.user.type === 'Bot' && c.body.includes('Demo Preview')
+            );
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
+
+  cleanup-pr-preview:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+
+      - name: Remove PR preview
+        run: |
+          PR_DIR="pr-${{ github.event.pull_request.number }}"
+          if [ -d "$PR_DIR" ]; then
+            rm -rf "$PR_DIR"
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add .
+            git diff --staged --quiet || git commit -m "Remove PR #${{ github.event.pull_request.number }} preview"
+            git push
+          fi
