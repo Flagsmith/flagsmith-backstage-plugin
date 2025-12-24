@@ -10,6 +10,16 @@ const useStyles = makeStyles(theme => ({
     border: `1px solid ${theme.palette.divider}`,
     borderRadius: theme.shape.borderRadius,
   },
+  tagsContainer: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: theme.spacing(1),
+  },
+  serverKeyChip: {
+    marginTop: theme.spacing(0.5),
+    backgroundColor: flagsmithColors.secondary,
+    color: 'white',
+  },
 }));
 
 type LiveVersionInfo = FlagsmithFeature['live_version'];
@@ -77,11 +87,7 @@ export const FeatureDetailsGrid = ({
             <Chip
               label="Server Key Only"
               size="small"
-              style={{
-                marginTop: 4,
-                backgroundColor: flagsmithColors.secondary,
-                color: 'white',
-              }}
+              className={classes.serverKeyChip}
             />
           )}
         </Box>
@@ -89,7 +95,7 @@ export const FeatureDetailsGrid = ({
 
       {feature.tags && feature.tags.length > 0 && (
         <Grid item xs={12}>
-          <Box display="flex" flexWrap="wrap" style={{ gap: 4 }}>
+          <Box className={classes.tagsContainer}>
             {feature.tags.map((tag, index) => (
               <Chip
                 key={index}

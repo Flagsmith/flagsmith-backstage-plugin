@@ -25,6 +25,12 @@ import { FeatureDetailsGrid } from './FeatureDetailsGrid';
 import { SegmentOverridesSection } from './SegmentOverridesSection';
 
 const useStyles = makeStyles(theme => ({
+  tableRow: {
+    '& > td': {
+      paddingTop: theme.spacing(1.5),
+      paddingBottom: theme.spacing(1.5),
+    },
+  },
   flagName: {
     display: 'flex',
     alignItems: 'center',
@@ -32,6 +38,17 @@ const useStyles = makeStyles(theme => ({
   },
   expandedContent: {
     backgroundColor: theme.palette.background.default,
+    padding: theme.spacing(2),
+  },
+  collapseCell: {
+    paddingBottom: 0,
+    paddingTop: 0,
+  },
+  loadingContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: theme.spacing(1),
     padding: theme.spacing(2),
   },
 }));
@@ -91,7 +108,7 @@ export const ExpandableRow = ({
 
   return (
     <>
-      <TableRow hover>
+      <TableRow hover className={classes.tableRow}>
         <TableCell padding="checkbox">
           <IconButton
             size="small"
@@ -127,17 +144,13 @@ export const ExpandableRow = ({
       </TableRow>
 
       <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={4}>
+        <TableCell className={classes.collapseCell} colSpan={4}>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box className={classes.expandedContent}>
               {loadingDetails && (
-                <Box display="flex" alignItems="center" p={2}>
+                <Box className={classes.loadingContainer}>
                   <CircularProgress size={20} />
-                  <Typography
-                    variant="body2"
-                    color="textSecondary"
-                    style={{ marginLeft: 8 }}
-                  >
+                  <Typography variant="body2" color="textSecondary">
                     Loading feature details...
                   </Typography>
                 </Box>

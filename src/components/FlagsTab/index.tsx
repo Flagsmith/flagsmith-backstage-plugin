@@ -28,6 +28,9 @@ const useStyles = makeStyles(theme => ({
     gap: theme.spacing(2),
     justifyContent: 'flex-end',
   },
+  errorHint: {
+    marginTop: theme.spacing(2),
+  },
 }));
 
 export const FlagsTab = () => {
@@ -63,7 +66,7 @@ export const FlagsTab = () => {
       <Box p={3}>
         <Typography color="error">Error: {error}</Typography>
         {!projectId && (
-          <Typography variant="body2" style={{ marginTop: 16 }}>
+          <Typography variant="body2" className={classes.errorHint}>
             Add a <code>flagsmith.com/project-id</code> annotation to this
             entity to view feature flags.
           </Typography>

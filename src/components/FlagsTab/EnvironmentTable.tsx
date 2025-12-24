@@ -45,6 +45,9 @@ const useStyles = makeStyles(theme => ({
     fontSize: '0.85rem',
     color: theme.palette.text.primary,
   },
+  envName: {
+    fontWeight: 500,
+  },
 }));
 
 interface EnvironmentTableProps {
@@ -79,7 +82,7 @@ export const EnvironmentTable = ({
             <TableRow key={env.id}>
               <TableCell>
                 <Box>
-                  <Typography variant="body2" style={{ fontWeight: 500 }}>
+                  <Typography variant="body2" className={classes.envName}>
                     {env.name}
                   </Typography>
                   {segmentCount > 0 && (

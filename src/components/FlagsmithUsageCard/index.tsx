@@ -13,6 +13,9 @@ const useStyles = makeStyles(theme => ({
     alignItems: 'center',
     gap: theme.spacing(1),
   },
+  errorHint: {
+    marginTop: theme.spacing(1),
+  },
 }));
 
 export const FlagsmithUsageCard = () => {
@@ -43,7 +46,7 @@ export const FlagsmithUsageCard = () => {
         <Box p={2}>
           <Typography color="error">Error: {error}</Typography>
           {!orgId && (
-            <Typography variant="body2" style={{ marginTop: 8 }}>
+            <Typography variant="body2" className={classes.errorHint}>
               Add a <code>flagsmith.com/organization-id</code> annotation to this
               entity.
             </Typography>
