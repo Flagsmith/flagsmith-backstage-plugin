@@ -9,10 +9,16 @@ const useStyles = makeStyles(() => ({
     gap: 6,
   },
   dot: {
-    width: 10,
-    height: 10,
     borderRadius: '50%',
     flexShrink: 0,
+  },
+  dotSmall: {
+    width: 8,
+    height: 8,
+  },
+  dotMedium: {
+    width: 10,
+    height: 10,
   },
   enabled: {
     backgroundColor: flagsmithColors.enabled,
@@ -20,7 +26,10 @@ const useStyles = makeStyles(() => ({
   disabled: {
     backgroundColor: flagsmithColors.disabled,
   },
-  label: {
+  labelSmall: {
+    fontSize: '0.75rem',
+  },
+  labelMedium: {
     fontSize: '0.875rem',
   },
 }));
@@ -44,20 +53,16 @@ export const FlagStatusIndicator = ({
 }: FlagStatusIndicatorProps) => {
   const classes = useStyles();
 
-  const dotSize = size === 'small' ? 8 : 10;
+  const dotSizeClass = size === 'small' ? classes.dotSmall : classes.dotMedium;
+  const labelClass = size === 'small' ? classes.labelSmall : classes.labelMedium;
 
   const indicator = (
     <Box className={classes.container}>
       <Box
-        className={`${classes.dot} ${enabled ? classes.enabled : classes.disabled}`}
-        style={{ width: dotSize, height: dotSize }}
+        className={`${classes.dot} ${dotSizeClass} ${enabled ? classes.enabled : classes.disabled}`}
       />
       {showLabel && (
-        <Typography
-          variant="body2"
-          className={classes.label}
-          style={{ fontSize: size === 'small' ? '0.75rem' : '0.875rem' }}
-        >
+        <Typography variant="body2" className={labelClass}>
           {enabled ? 'On' : 'Off'}
         </Typography>
       )}

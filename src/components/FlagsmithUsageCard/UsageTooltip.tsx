@@ -1,5 +1,21 @@
 import { Box, Typography } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
 import { FlagsmithUsageData } from '../../api/FlagsmithClient';
+
+const useStyles = makeStyles(theme => ({
+  container: {
+    padding: theme.spacing(1.5),
+    backgroundColor: 'rgba(12, 0, 0, 0.95)',
+    border: '1px solid #ccc',
+    borderRadius: theme.shape.borderRadius,
+  },
+  title: {
+    fontWeight: 600,
+  },
+  content: {
+    marginTop: theme.spacing(1),
+  },
+}));
 
 interface UsageTooltipProps {
   active?: boolean;
@@ -9,6 +25,8 @@ interface UsageTooltipProps {
 }
 
 export const UsageTooltip = ({ active, payload }: UsageTooltipProps) => {
+  const classes = useStyles();
+
   if (!active || !payload || !payload.length) {
     return null;
   }
@@ -16,22 +34,15 @@ export const UsageTooltip = ({ active, payload }: UsageTooltipProps) => {
   const data = payload[0].payload;
 
   return (
-    <Box
-      p={1.5}
-      style={{
-        backgroundColor: 'rgba(12, 0, 0, 0.95)',
-        border: '1px solid #ccc',
-        borderRadius: 4,
-      }}
-    >
-      <Typography variant="subtitle2" style={{ fontWeight: 600 }}>
+    <Box className={classes.container}>
+      <Typography variant="subtitle2" className={classes.title}>
         {new Date(data.day).toLocaleDateString('en-US', {
           month: 'short',
           day: 'numeric',
           year: 'numeric',
         })}
       </Typography>
-      <Box mt={1}>
+      <Box className={classes.content}>
         <Typography variant="body2">
           <strong>Flags:</strong> {data.flags ?? 0}
         </Typography>

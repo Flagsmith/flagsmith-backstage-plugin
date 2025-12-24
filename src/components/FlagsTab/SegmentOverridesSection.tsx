@@ -47,6 +47,9 @@ const useStyles = makeStyles(theme => ({
     height: 20,
     marginLeft: theme.spacing(1),
   },
+  statusLabel: {
+    marginLeft: theme.spacing(1),
+  },
 }));
 
 type LiveVersionInfo = FlagsmithFeature['live_version'];
@@ -107,7 +110,7 @@ export const SegmentOverridesSection = ({
                   >
                     <Box display="flex" alignItems="center">
                       <FlagStatusIndicator enabled={state.enabled} size="small" />
-                      <Typography variant="body2" style={{ marginLeft: 8 }}>
+                      <Typography variant="body2" className={classes.statusLabel}>
                         {state.enabled ? 'Enabled' : 'Disabled'}
                       </Typography>
                       {state.feature_segment && (
