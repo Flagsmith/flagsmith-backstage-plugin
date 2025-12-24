@@ -6,7 +6,6 @@ import {
   mockProject,
   mockEnvironments,
   mockFeatures,
-  mockEntity,
   mockEntityNoAnnotations,
 } from '../../../__tests__/fixtures';
 
@@ -173,8 +172,8 @@ describe('FlagsTab', () => {
       expect(screen.getByText('feature-one')).toBeInTheDocument();
     });
 
-    // Should have Open Dashboard button
-    const dashboardButton = screen.getByRole('button', { name: /open dashboard/i });
-    expect(dashboardButton).toBeInTheDocument();
+    // Should have Open Dashboard link (renders as an anchor with aria-label)
+    const dashboardLink = screen.getByRole('link', { name: /open dashboard/i });
+    expect(dashboardLink).toBeInTheDocument();
   });
 });

@@ -20,7 +20,11 @@ export const createMockDiscoveryApi = (baseUrl = 'http://localhost:7007'): Disco
 export const createMockFetchApi = (responses: Record<string, unknown> = {}) => {
   const mockFetch = jest.fn().mockImplementation(async (url: string) => {
     // Find matching response based on URL pattern
-    for (const [pattern, data] of Object.entries(responses)) {
+    // Sort patterns by length (longest first) to match more specific patterns first
+    const sortedPatterns = Object.entries(responses).sort(
+      ([a], [b]) => b.length - a.length,
+    );
+    for (const [pattern, data] of sortedPatterns) {
       if (url.includes(pattern)) {
         return {
           ok: true,
