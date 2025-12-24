@@ -76,7 +76,6 @@ export const ConfigScreen: React.FC<ConfigScreenProps> = ({ onConfigure }) => {
   const [apiKey, setApiKey] = useState('');
   const [projectId, setProjectId] = useState('');
   const [orgId, setOrgId] = useState('');
-  const [baseUrl, setBaseUrl] = useState('https://api.flagsmith.com/api/v1');
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const validate = (): boolean => {
@@ -84,8 +83,7 @@ export const ConfigScreen: React.FC<ConfigScreenProps> = ({ onConfigure }) => {
 
     const newErrors: Record<string, string> = {};
     if (!apiKey.trim()) newErrors.apiKey = 'API Key is required';
-    if (!projectId.trim()) newErrors.projectId = 'Project ID is required';
-    if (!orgId.trim()) newErrors.orgId = 'Organization ID is required';
+    // Project ID and Org ID are optional - will use first available if not provided
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -99,9 +97,8 @@ export const ConfigScreen: React.FC<ConfigScreenProps> = ({ onConfigure }) => {
       onConfigure({
         mode: 'live',
         apiKey: apiKey.trim(),
-        projectId: projectId.trim(),
-        orgId: orgId.trim(),
-        baseUrl: baseUrl.trim() || 'https://api.flagsmith.com/api/v1',
+        projectId: projectId.trim() || undefined,
+        orgId: orgId.trim() || undefined,
       });
     }
   };
@@ -157,7 +154,7 @@ export const ConfigScreen: React.FC<ConfigScreenProps> = ({ onConfigure }) => {
             <Box className={classes.liveFields}>
               <Alert severity="info" className={classes.alert}>
                 Your credentials will be stored in your browser&apos;s local
-                storage. Refresh the page to reconfigure.
+                storage. Click RECONFIGURE to change them.
               </Alert>
 
               <TextField
@@ -167,7 +164,7 @@ export const ConfigScreen: React.FC<ConfigScreenProps> = ({ onConfigure }) => {
                 error={!!errors.apiKey}
                 helperText={
                   errors.apiKey ||
-                  'Your Flagsmith API Key (found in Organisation Settings)'
+                  'Your Master API Key (found in Organisation Settings → API Keys)'
                 }
                 fullWidth
                 required
@@ -176,39 +173,20 @@ export const ConfigScreen: React.FC<ConfigScreenProps> = ({ onConfigure }) => {
               />
 
               <TextField
-                label="Project ID"
+                label="Project ID (optional)"
                 value={projectId}
                 onChange={e => setProjectId(e.target.value)}
-                error={!!errors.projectId}
-                helperText={
-                  errors.projectId || 'The numeric ID of your Flagsmith project'
-                }
+                helperText="Leave empty to use first available project"
                 fullWidth
-                required
                 variant="outlined"
                 size="small"
               />
 
               <TextField
-                label="Organization ID"
+                label="Organization ID (optional)"
                 value={orgId}
                 onChange={e => setOrgId(e.target.value)}
-                error={!!errors.orgId}
-                helperText={
-                  errors.orgId ||
-                  'The numeric ID of your Flagsmith organization'
-                }
-                fullWidth
-                required
-                variant="outlined"
-                size="small"
-              />
-
-              <TextField
-                label="API Base URL"
-                value={baseUrl}
-                onChange={e => setBaseUrl(e.target.value)}
-                helperText="Only change for self-hosted Flagsmith instances"
+                helperText="Leave empty to use first available organization"
                 fullWidth
                 variant="outlined"
                 size="small"

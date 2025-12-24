@@ -2,10 +2,10 @@ export type DemoMode = 'mock' | 'live';
 
 export interface DemoConfig {
   mode: DemoMode;
-  apiKey?: string;
+  // For live mode - API credentials
+  apiKey?: string;  // Master API Key from Organisation Settings → API Keys
   projectId?: string;
   orgId?: string;
-  baseUrl?: string;
 }
 
 export interface ConfigContextValue {
