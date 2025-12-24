@@ -11,8 +11,12 @@ import {
   Typography,
   Container,
   CircularProgress,
+  IconButton,
+  Tooltip,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
+import Brightness4Icon from '@material-ui/icons/Brightness4';
+import Brightness7Icon from '@material-ui/icons/Brightness7';
 import { EntityProvider } from '@backstage/plugin-catalog-react';
 import { Entity } from '@backstage/catalog-model';
 import { TestApiProvider } from '@backstage/test-utils';
@@ -113,24 +117,28 @@ const createFetchApi = (config: DemoConfig) => ({
   },
 });
 
-const theme = createTheme({
-  palette: {
-    type: 'light',
-    primary: {
-      main: '#0AC2A3',
+const createAppTheme = (mode: 'light' | 'dark') =>
+  createTheme({
+    palette: {
+      type: mode,
+      primary: {
+        main: '#0AC2A3',
+      },
+      secondary: {
+        main: '#7B51FB',
+      },
+      background:
+        mode === 'light'
+          ? { default: '#f5f5f5', paper: '#ffffff' }
+          : { default: '#121212', paper: '#1e1e1e' },
     },
-    secondary: {
-      main: '#7B51FB',
+    typography: {
+      fontFamily: 'Roboto, sans-serif',
     },
-    background: {
-      default: '#f5f5f5',
-      paper: '#ffffff',
-    },
-  },
-  typography: {
-    fontFamily: 'Roboto, sans-serif',
-  },
-});
+  });
+
+const lightTheme = createAppTheme('light');
+const darkTheme = createAppTheme('dark');
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -155,7 +163,11 @@ const useLoadingStyles = makeStyles(theme => ({
   },
 }));
 
-const LoadingScreen = () => {
+interface LoadingScreenProps {
+  theme: typeof lightTheme;
+}
+
+const LoadingScreen = ({ theme }: LoadingScreenProps) => {
   const classes = useLoadingStyles();
   return (
     <ThemeProvider theme={theme}>
@@ -173,9 +185,16 @@ const LoadingScreen = () => {
 interface DemoContentProps {
   config: DemoConfig;
   onReconfigure: () => void;
+  isDarkMode: boolean;
+  onToggleTheme: () => void;
 }
 
-const DemoContent: React.FC<DemoContentProps> = ({ config, onReconfigure }) => {
+const DemoContent: React.FC<DemoContentProps> = ({
+  config,
+  onReconfigure,
+  isDarkMode,
+  onToggleTheme,
+}) => {
   const [tabValue, setTabValue] = useState(0);
 
   const mockEntity = createMockEntity(config);
@@ -198,6 +217,11 @@ const DemoContent: React.FC<DemoContentProps> = ({ config, onReconfigure }) => {
               <Typography variant="h6" style={{ flexGrow: 1 }}>
                 Flagsmith Backstage Plugin Demo
               </Typography>
+              <Tooltip title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}>
+                <IconButton color="inherit" onClick={onToggleTheme}>
+                  {isDarkMode ? <Brightness7Icon /> : <Brightness4Icon />}
+                </IconButton>
+              </Tooltip>
             </Toolbar>
             <Tabs
               value={tabValue}
@@ -241,6 +265,10 @@ export const App = () => {
   const [loading, setLoading] = useState(true);
   const [resolvedConfig, setResolvedConfig] = useState<DemoConfig | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  const theme = isDarkMode ? darkTheme : lightTheme;
+  const toggleTheme = () => setIsDarkMode(prev => !prev);
 
   useEffect(() => {
     let isMounted = true;
@@ -304,7 +332,7 @@ export const App = () => {
   };
 
   if (loading) {
-    return <LoadingScreen />;
+    return <LoadingScreen theme={theme} />;
   }
 
   if (!isConfigured || !config) {
@@ -345,13 +373,18 @@ export const App = () => {
 
   // Wait for resolved config in live mode
   if (!resolvedConfig) {
-    return <LoadingScreen />;
+    return <LoadingScreen theme={theme} />;
   }
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <DemoContent config={resolvedConfig} onReconfigure={handleReconfigure} />
+      <DemoContent
+        config={resolvedConfig}
+        onReconfigure={handleReconfigure}
+        isDarkMode={isDarkMode}
+        onToggleTheme={toggleTheme}
+      />
     </ThemeProvider>
   );
 };
