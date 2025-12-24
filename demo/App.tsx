@@ -212,9 +212,9 @@ const DemoContent: React.FC<DemoContentProps> = ({
         <Box sx={{ flexGrow: 1 }}>
           <DemoBanner mode={config.mode} onReconfigure={onReconfigure} />
 
-          <AppBar position="static" style={{ backgroundColor: '#1F1F1F' }}>
+          <AppBar position="static" color="default">
             <Toolbar>
-              <Typography variant="h6" style={{ flexGrow: 1 }}>
+              <Typography variant="h6" style={{ flexGrow: 1, color: isDarkMode ? '#fff' : 'inherit' }}>
                 Flagsmith Backstage Plugin Demo
               </Typography>
               <Tooltip title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}>
@@ -228,7 +228,7 @@ const DemoContent: React.FC<DemoContentProps> = ({
               onChange={(_e, newValue) => setTabValue(newValue)}
               indicatorColor="primary"
               textColor="inherit"
-              style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
+              style={{ backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }}
             >
               <Tab label="Feature Flags" />
               <Tab label="Overview Card" />
