@@ -12,6 +12,7 @@ import {
   Container,
   CircularProgress,
 } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
 import { EntityProvider } from '@backstage/plugin-catalog-react';
 import { Entity } from '@backstage/catalog-model';
 import { TestApiProvider } from '@backstage/test-utils';
@@ -23,6 +24,43 @@ import { FlagsmithUsageCard } from '../src/components/FlagsmithUsageCard';
 import { useConfig, DemoConfig } from './config';
 import { ConfigScreen } from './components';
 import { startMsw, stopMsw } from './utils/mswLoader';
+
+// Fetch first available org and project if not provided
+const resolveOrgAndProject = async (
+  config: DemoConfig,
+): Promise<{ projectId: string; orgId: string }> => {
+  const headers = { Authorization: `Api-Key ${config.apiKey}` };
+
+  // Get first organisation
+  let orgId = config.orgId;
+  if (!orgId) {
+    const orgsResponse = await fetch(
+      'https://api.flagsmith.com/api/v1/organisations/',
+      { headers },
+    );
+    if (!orgsResponse.ok) throw new Error('Failed to fetch organisations');
+    const orgs = await orgsResponse.json();
+    if (!orgs.results?.length) throw new Error('No organisations found');
+    orgId = String(orgs.results[0].id);
+    console.log('[Demo] Using first organisation:', orgId, orgs.results[0].name);
+  }
+
+  // Get first project
+  let projectId = config.projectId;
+  if (!projectId) {
+    const projectsResponse = await fetch(
+      `https://api.flagsmith.com/api/v1/organisations/${orgId}/projects/`,
+      { headers },
+    );
+    if (!projectsResponse.ok) throw new Error('Failed to fetch projects');
+    const projects = await projectsResponse.json();
+    if (!projects.length) throw new Error('No projects found');
+    projectId = String(projects[0].id);
+    console.log('[Demo] Using first project:', projectId, projects[0].name);
+  }
+
+  return { projectId, orgId };
+};
 
 const createMockEntity = (config: DemoConfig): Entity => ({
   apiVersion: 'backstage.io/v1alpha1',
@@ -49,12 +87,13 @@ const createDiscoveryApi = (config: DemoConfig) => ({
       // which matches the MSW handlers pattern */proxy/flagsmith/...
       return `${window.location.origin}/api/proxy`;
     }
-    return config.baseUrl || 'https://api.flagsmith.com/api/v1';
+    return 'https://api.flagsmith.com/api/v1';
   },
 });
 
 const createFetchApi = (config: DemoConfig) => ({
-  fetch: async (url: string, init?: RequestInit) => {
+  fetch: async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
     let finalUrl = url;
 
     if (config.mode === 'live') {
@@ -62,13 +101,15 @@ const createFetchApi = (config: DemoConfig) => ({
       // but in live mode we're hitting the Flagsmith API directly, so strip it
       finalUrl = url.replace('/flagsmith/', '/');
 
+      const headers = new Headers(init?.headers);
       if (config.apiKey) {
-        const headers = new Headers(init?.headers);
-        headers.set('Authorization', `Token ${config.apiKey}`);
-        return fetch(finalUrl, { ...init, headers });
+        // Flagsmith API expects Authorization header with Api-Key prefix
+        headers.set('Authorization', `Api-Key ${config.apiKey}`);
       }
+      console.log('[Demo] Live mode fetch:', finalUrl, 'Headers:', Object.fromEntries(headers.entries()));
+      return fetch(finalUrl, { ...init, headers });
     }
-    return fetch(finalUrl, init);
+    return fetch(input, init);
   },
 });
 
@@ -103,24 +144,31 @@ const TabPanel = ({ children, value, index }: TabPanelProps) => (
   </div>
 );
 
-const LoadingScreen = () => (
-  <ThemeProvider theme={theme}>
-    <CssBaseline />
-    <Box
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-      minHeight="100vh"
-      flexDirection="column"
-      style={{ gap: 16 }}
-    >
-      <CircularProgress color="primary" />
-      <Typography variant="body2" color="textSecondary">
-        Loading demo...
-      </Typography>
-    </Box>
-  </ThemeProvider>
-);
+const useLoadingStyles = makeStyles(theme => ({
+  container: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: '100vh',
+    flexDirection: 'column',
+    gap: theme.spacing(2),
+  },
+}));
+
+const LoadingScreen = () => {
+  const classes = useLoadingStyles();
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Box className={classes.container}>
+        <CircularProgress color="primary" />
+        <Typography variant="body2" color="textSecondary">
+          Loading demo...
+        </Typography>
+      </Box>
+    </ThemeProvider>
+  );
+};
 
 interface DemoContentProps {
   config: DemoConfig;
@@ -191,8 +239,12 @@ export const App = () => {
   const { config, isConfigured, setConfig, clearConfig } = useConfig();
   const [mswStarted, setMswStarted] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [resolvedConfig, setResolvedConfig] = useState<DemoConfig | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let isMounted = true;
+
     const initializeDemo = async () => {
       if (!config) {
         setLoading(false);
@@ -200,31 +252,54 @@ export const App = () => {
       }
 
       if (config.mode === 'mock') {
-        await startMsw();
-        setMswStarted(true);
+        try {
+          await startMsw();
+          if (isMounted) {
+            setMswStarted(true);
+            setResolvedConfig(config);
+          }
+        } catch (err) {
+          console.error('Failed to start MSW:', err);
+        }
+      } else if (config.mode === 'live') {
+        // Resolve org and project if not provided
+        try {
+          const { projectId, orgId } = await resolveOrgAndProject(config);
+          if (isMounted) {
+            setResolvedConfig({ ...config, projectId, orgId });
+          }
+        } catch (err) {
+          console.error('Failed to resolve org/project:', err);
+          if (isMounted) {
+            setError(err instanceof Error ? err.message : 'Failed to connect to Flagsmith');
+          }
+        }
       }
-      setLoading(false);
+      if (isMounted) {
+        setLoading(false);
+      }
     };
 
     initializeDemo();
 
     return () => {
-      if (mswStarted) {
-        stopMsw();
-      }
+      isMounted = false;
     };
-  }, [config, mswStarted]);
+  }, [config]);
 
   const handleReconfigure = () => {
     if (mswStarted) {
       stopMsw();
       setMswStarted(false);
     }
+    setResolvedConfig(null);
+    setError(null);
     clearConfig();
   };
 
   const handleConfigure = async (newConfig: DemoConfig) => {
     setLoading(true);
+    setError(null);
     setConfig(newConfig);
   };
 
@@ -241,10 +316,42 @@ export const App = () => {
     );
   }
 
+  // Show error if failed to resolve org/project
+  if (error) {
+    return (
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <Box
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          minHeight="100vh"
+          flexDirection="column"
+          style={{ gap: 16, padding: 24 }}
+        >
+          <Typography variant="h6" color="error">
+            {error}
+          </Typography>
+          <Typography variant="body2" color="textSecondary">
+            Please check your API Key and try again.
+          </Typography>
+          <Box mt={2}>
+            <button onClick={handleReconfigure}>Reconfigure</button>
+          </Box>
+        </Box>
+      </ThemeProvider>
+    );
+  }
+
+  // Wait for resolved config in live mode
+  if (!resolvedConfig) {
+    return <LoadingScreen />;
+  }
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <DemoContent config={config} onReconfigure={handleReconfigure} />
+      <DemoContent config={resolvedConfig} onReconfigure={handleReconfigure} />
     </ThemeProvider>
   );
 };
