@@ -209,12 +209,18 @@ const DemoContent: React.FC<DemoContentProps> = ({
       ]}
     >
       <EntityProvider entity={mockEntity}>
-        <Box sx={{ flexGrow: 1 }}>
+        <Box sx={{ flexGrow: 1, minHeight: '100vh', bgcolor: 'background.default' }}>
           <DemoBanner mode={config.mode} onReconfigure={onReconfigure} />
 
-          <AppBar position="static" color="default">
+          <AppBar
+            position="static"
+            style={{
+              backgroundColor: isDarkMode ? '#1e1e1e' : '#ffffff',
+              color: isDarkMode ? '#ffffff' : '#333333',
+            }}
+          >
             <Toolbar>
-              <Typography variant="h6" style={{ flexGrow: 1, color: isDarkMode ? '#fff' : 'inherit' }}>
+              <Typography variant="h6" style={{ flexGrow: 1 }}>
                 Flagsmith Backstage Plugin Demo
               </Typography>
               <Tooltip title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}>
@@ -228,7 +234,7 @@ const DemoContent: React.FC<DemoContentProps> = ({
               onChange={(_e, newValue) => setTabValue(newValue)}
               indicatorColor="primary"
               textColor="inherit"
-              style={{ backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }}
+              style={{ backgroundColor: isDarkMode ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)' }}
             >
               <Tab label="Feature Flags" />
               <Tab label="Overview Card" />
@@ -377,7 +383,7 @@ export const App = () => {
   }
 
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider theme={theme} key={isDarkMode ? 'dark' : 'light'}>
       <CssBaseline />
       <DemoContent
         config={resolvedConfig}
