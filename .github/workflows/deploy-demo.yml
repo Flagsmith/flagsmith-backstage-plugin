@@ -110,6 +110,9 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
+          # Move artifact to temp location before switching branches
+          mv dist-demo /tmp/dist-demo
+
           # Check if gh-pages branch exists
           if git ls-remote --heads origin gh-pages | grep -q gh-pages; then
             git fetch origin gh-pages
@@ -127,7 +130,7 @@ jobs:
           PR_DIR="pr-${{ github.event.pull_request.number }}"
           rm -rf "$PR_DIR"
           mkdir -p "$PR_DIR"
-          cp -r dist-demo/* "$PR_DIR/"
+          cp -r /tmp/dist-demo/* "$PR_DIR/"
 
           git add .
           git diff --staged --quiet || git commit -m "Deploy PR #${{ github.event.pull_request.number }} preview"
