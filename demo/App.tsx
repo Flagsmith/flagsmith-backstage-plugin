@@ -45,7 +45,9 @@ const createMockEntity = (config: DemoConfig): Entity => ({
 const createDiscoveryApi = (config: DemoConfig) => ({
   getBaseUrl: async (_pluginId: string) => {
     if (config.mode === 'mock') {
-      return `${window.location.origin}/api`;
+      // Return /api/proxy so FlagsmithClient builds URLs like /api/proxy/flagsmith/...
+      // which matches the MSW handlers pattern */proxy/flagsmith/...
+      return `${window.location.origin}/api/proxy`;
     }
     return config.baseUrl || 'https://api.flagsmith.com/api/v1';
   },
