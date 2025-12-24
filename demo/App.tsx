@@ -55,12 +55,20 @@ const createDiscoveryApi = (config: DemoConfig) => ({
 
 const createFetchApi = (config: DemoConfig) => ({
   fetch: async (url: string, init?: RequestInit) => {
-    if (config.mode === 'live' && config.apiKey) {
-      const headers = new Headers(init?.headers);
-      headers.set('Authorization', `Token ${config.apiKey}`);
-      return fetch(url, { ...init, headers });
+    let finalUrl = url;
+
+    if (config.mode === 'live') {
+      // FlagsmithClient appends /flagsmith to all URLs (for Backstage proxy routing)
+      // but in live mode we're hitting the Flagsmith API directly, so strip it
+      finalUrl = url.replace('/flagsmith/', '/');
+
+      if (config.apiKey) {
+        const headers = new Headers(init?.headers);
+        headers.set('Authorization', `Token ${config.apiKey}`);
+        return fetch(finalUrl, { ...init, headers });
+      }
     }
-    return fetch(url, init);
+    return fetch(finalUrl, init);
   },
 });
 
