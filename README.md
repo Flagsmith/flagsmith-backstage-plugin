@@ -1,5 +1,7 @@
 # Flagsmith Plugin for Backstage
 
+[![npm version](https://badge.fury.io/js/%40flagsmith%2Fbackstage-plugin.svg)](https://www.npmjs.com/package/@flagsmith/backstage-plugin)
+
 Integrate [Flagsmith](https://flagsmith.com) feature flags into your Backstage instance.
 
 ## Features
