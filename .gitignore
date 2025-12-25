@@ -9,12 +9,15 @@ node_modules/
 # Production
 /build
 /dist
+/dist-demo
+/dist-types
 /lib
 *.tsbuildinfo
 
 # Misc
 .DS_Store
 .env
+app-config.local.yaml
 .env.local
 .env.development.local
 .env.test.local
