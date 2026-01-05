@@ -1,4 +1,3 @@
-import { useState, useCallback } from 'react';
 import { TextField, InputAdornment } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import SearchIcon from '@material-ui/icons/Search';
@@ -18,47 +17,19 @@ interface SearchInputProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
-  debounceMs?: number;
 }
 
 /**
- * Reusable search input with debounce support
+ * Reusable search input component
  */
 export const SearchInput = ({
   value,
   onChange,
   placeholder = 'Search flags...',
-  debounceMs = 300,
 }: SearchInputProps) => {
   const classes = useStyles();
-  const [localValue, setLocalValue] = useState(value);
-  const [debounceTimeout, setDebounceTimeout] = useState<NodeJS.Timeout | null>(
-    null,
-  );
 
-  const handleChange = useCallback(
-    (newValue: string) => {
-      setLocalValue(newValue);
-
-      // Clear existing timeout
-      if (debounceTimeout) {
-        clearTimeout(debounceTimeout);
-      }
-
-      // Set new timeout for debounced onChange
-      const timeout = setTimeout(() => {
-        onChange(newValue);
-      }, debounceMs);
-
-      setDebounceTimeout(timeout);
-    },
-    [onChange, debounceMs, debounceTimeout],
-  );
-
-  const handleClear = () => {
-    setLocalValue('');
-    onChange('');
-  };
+  const handleClear = () => onChange('');
 
   return (
     <TextField
@@ -66,8 +37,8 @@ export const SearchInput = ({
       variant="outlined"
       size="small"
       placeholder={placeholder}
-      value={localValue}
-      onChange={e => handleChange(e.target.value)}
+      value={value}
+      onChange={e => onChange(e.target.value)}
       inputProps={{
         'aria-label': placeholder,
         role: 'searchbox',
@@ -78,7 +49,7 @@ export const SearchInput = ({
             <SearchIcon color="action" aria-hidden="true" />
           </InputAdornment>
         ),
-        endAdornment: localValue ? (
+        endAdornment: value ? (
           <InputAdornment position="end">
             <IconButton
               className={classes.clearButton}
