@@ -1,6 +1,4 @@
 import {
-  Box,
-  Chip,
   Table,
   TableBody,
   TableCell,
@@ -34,12 +32,6 @@ const useStyles = makeStyles(theme => ({
     color: theme.palette.text.secondary,
     fontWeight: 600,
   },
-  envBadge: {
-    fontSize: '0.7rem',
-    height: 18,
-    marginRight: theme.spacing(0.5),
-    marginTop: theme.spacing(0.5),
-  },
   valueCell: {
     fontFamily: 'monospace',
     fontSize: '0.85rem',
@@ -72,25 +64,14 @@ export const EnvironmentTable = ({
         {environments.map(env => {
           const envState = feature.environment_state?.find(s => s.id === env.id);
           const enabled = envState?.enabled ?? feature.default_enabled ?? false;
-          const segmentCount = feature.num_segment_overrides ?? 0;
           const value = feature.type === 'CONFIG' ? feature.initial_value : null;
 
           return (
             <TableRow key={env.id}>
               <TableCell>
-                <Box>
-                  <Typography variant="body2" style={{ fontWeight: 500 }}>
-                    {env.name}
-                  </Typography>
-                  {segmentCount > 0 && (
-                    <Chip
-                      label={`${segmentCount} segment${segmentCount > 1 ? 's' : ''}`}
-                      size="small"
-                      variant="outlined"
-                      className={classes.envBadge}
-                    />
-                  )}
-                </Box>
+                <Typography variant="body2" style={{ fontWeight: 500 }}>
+                  {env.name}
+                </Typography>
               </TableCell>
               <TableCell>
                 <Typography

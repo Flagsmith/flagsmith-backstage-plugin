@@ -28,20 +28,6 @@ export function buildEnvStatusTooltip(
 }
 
 /**
- * Calculate enabled/disabled feature counts.
- */
-export function calculateFeatureStats(features: FlagsmithFeature[]): {
-  enabledCount: number;
-  disabledCount: number;
-} {
-  const enabledCount = features.filter(f => f.default_enabled).length;
-  return {
-    enabledCount,
-    disabledCount: features.length - enabledCount,
-  };
-}
-
-/**
  * Paginate an array of items.
  */
 export function paginate<T>(
