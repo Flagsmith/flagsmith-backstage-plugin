@@ -184,12 +184,12 @@ export class FlagsmithClient {
     projectId?: number,
   ): Promise<FlagsmithUsageData[]> {
     const baseUrl = await this.getBaseUrl();
-    let url = `${baseUrl}/organisations/${orgId}/usage-data/`;
+    const url = new URL(`${baseUrl}/organisations/${orgId}/usage-data/`);
     if (projectId) {
-      url += `?project_id=${projectId}`;
+      url.searchParams.set('project_id', projectId.toString());
     }
 
-    const response = await this.fetchApi.fetch(url);
+    const response = await this.fetchApi.fetch(url.toString());
 
     if (!response.ok) {
       throw new Error(`Failed to fetch usage data: ${response.statusText}`);
