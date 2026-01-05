@@ -50,6 +50,7 @@ export interface FlagsmithFeature {
   type?: string;
   default_enabled?: boolean;
   is_archived?: boolean;
+  initial_value?: string | null;
 }
 
 export interface FlagsmithFeatureVersion {

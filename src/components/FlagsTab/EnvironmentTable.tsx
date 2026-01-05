@@ -73,7 +73,7 @@ export const EnvironmentTable = ({
           const envState = feature.environment_state?.find(s => s.id === env.id);
           const enabled = envState?.enabled ?? feature.default_enabled ?? false;
           const segmentCount = feature.num_segment_overrides ?? 0;
-          const value = feature.type === 'CONFIG' ? (feature as FlagsmithFeature & { initial_value?: string }).initial_value : null;
+          const value = feature.type === 'CONFIG' ? feature.initial_value : null;
 
           return (
             <TableRow key={env.id}>
