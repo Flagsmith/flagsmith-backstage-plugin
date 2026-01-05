@@ -1,9 +1,11 @@
+import { PropsWithChildren } from 'react';
 import { createDevApp } from '@backstage/dev-utils';
 import { EntityProvider } from '@backstage/plugin-catalog-react';
 import { Entity } from '@backstage/catalog-model';
 import { setupWorker } from 'msw';
-import { PropsWithChildren } from 'react';
-import { flagsmithPlugin, FlagsTab, FlagsmithOverviewCard, FlagsmithUsageCard } from '../src';
+import { FlagsTab } from '../src/components/FlagsTab';
+import { FlagsmithOverviewCard } from '../src/components/FlagsmithOverviewCard';
+import { FlagsmithUsageCard } from '../src/components/FlagsmithUsageCard';
 import { handlers } from './mockHandlers';
 
 // Start MSW worker for API mocking
@@ -37,7 +39,6 @@ const EntityWrapper = ({ children }: PropsWithChildren<{}>) => (
 );
 
 createDevApp()
-  .registerPlugin(flagsmithPlugin)
   .addPage({
     element: (
       <EntityWrapper>
