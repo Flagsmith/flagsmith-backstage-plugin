@@ -65,6 +65,10 @@ export const SegmentOverridesSection = ({
   const classes = useStyles();
   const [showMoreOpen, setShowMoreOpen] = useState(false);
 
+  const segmentOverrides =
+    details?.featureState?.filter(state => state.feature_segment !== null) ??
+    [];
+
   return (
     <>
       <Box
@@ -98,9 +102,12 @@ export const SegmentOverridesSection = ({
               <Typography variant="subtitle2" gutterBottom>
                 Segment Overrides
               </Typography>
-              {details.featureState
-                .filter(state => state.feature_segment !== null)
-                .map((state, index) => (
+              {segmentOverrides.length === 0 ? (
+                <Typography variant="body2" color="textSecondary">
+                  No segment overrides configured.
+                </Typography>
+              ) : (
+                segmentOverrides.map((state, index) => (
                   <Box
                     key={state.id || index}
                     className={classes.featureStateItem}
@@ -145,12 +152,7 @@ export const SegmentOverridesSection = ({
                       </Box>
                     )}
                   </Box>
-                ))}
-              {details.featureState.filter(s => s.feature_segment !== null)
-                .length === 0 && (
-                <Typography variant="body2" color="textSecondary">
-                  No segment overrides configured.
-                </Typography>
+                ))
               )}
             </Box>
           )}
