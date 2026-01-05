@@ -46,10 +46,10 @@ export function useFlagsmithProject(
         setProject(projectData);
 
         const envs = await client.getProjectEnvironments(parseInt(projectId, 10));
-        setEnvironments(envs);
+        setEnvironments(envs || []);
 
         const projectFeatures = await client.getProjectFeatures(projectId);
-        setFeatures(projectFeatures);
+        setFeatures(projectFeatures || []);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Unknown error');
       } finally {
