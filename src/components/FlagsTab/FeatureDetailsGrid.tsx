@@ -17,13 +17,11 @@ type LiveVersionInfo = FlagsmithFeature['live_version'];
 interface FeatureDetailsGridProps {
   feature: FlagsmithFeature;
   liveVersion: LiveVersionInfo;
-  segmentOverrides: number;
 }
 
 export const FeatureDetailsGrid = ({
   feature,
   liveVersion,
-  segmentOverrides,
 }: FeatureDetailsGridProps) => {
   const classes = useStyles();
 
@@ -46,23 +44,6 @@ export const FeatureDetailsGrid = ({
           </Box>
         </Grid>
       )}
-
-      <Grid item xs={12} md={4}>
-        <Box className={classes.detailCard}>
-          <Typography variant="subtitle2" gutterBottom>
-            Targeting
-          </Typography>
-          <Typography variant="body2">
-            Segment overrides: {segmentOverrides}
-          </Typography>
-          {feature.num_identity_overrides !== null &&
-            feature.num_identity_overrides !== undefined && (
-              <Typography variant="body2">
-                Identity overrides: {feature.num_identity_overrides}
-              </Typography>
-            )}
-        </Box>
-      </Grid>
 
       <Grid item xs={12} md={4}>
         <Box className={classes.detailCard}>

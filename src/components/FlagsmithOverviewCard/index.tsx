@@ -17,8 +17,7 @@ import { useEntity } from '@backstage/plugin-catalog-react';
 import { FlagsmithLink, MiniPagination, LoadingState } from '../shared';
 import { buildProjectUrl } from '../../theme/flagsmithTheme';
 import { useFlagsmithProject } from '../../hooks';
-import { calculateFeatureStats, paginate } from '../../utils';
-import { FlagStatsRow } from './FlagStatsRow';
+import { paginate } from '../../utils';
 import { FeatureFlagRow } from './FeatureFlagRow';
 
 const useStyles = makeStyles(theme => ({
@@ -62,7 +61,6 @@ export const FlagsmithOverviewCard = () => {
     page,
     PAGE_SIZE,
   );
-  const { enabledCount, disabledCount } = calculateFeatureStats(features);
   const dashboardUrl = buildProjectUrl(
     projectId || '',
     environments[0]?.id?.toString(),
@@ -78,8 +76,6 @@ export const FlagsmithOverviewCard = () => {
         </Box>
       }
     >
-      <FlagStatsRow enabledCount={enabledCount} disabledCount={disabledCount} />
-
       <TableContainer component={Paper} variant="outlined">
         <Table size="small">
           <TableHead>

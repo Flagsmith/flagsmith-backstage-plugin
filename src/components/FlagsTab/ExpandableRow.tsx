@@ -22,7 +22,6 @@ import { FlagsmithLink } from '../shared';
 import { buildFlagUrl } from '../../theme/flagsmithTheme';
 import { EnvironmentTable } from './EnvironmentTable';
 import { FeatureDetailsGrid } from './FeatureDetailsGrid';
-import { SegmentOverridesSection } from './SegmentOverridesSection';
 
 const useStyles = makeStyles(theme => ({
   flagName: {
@@ -81,8 +80,6 @@ export const ExpandableRow = ({
   };
 
   const liveVersion = details?.liveVersion || feature.live_version;
-  const segmentOverrides =
-    details?.segmentOverrides ?? feature.num_segment_overrides ?? 0;
   const flagUrl = buildFlagUrl(
     projectId,
     primaryEnvId?.toString() || '',
@@ -152,21 +149,12 @@ export const ExpandableRow = ({
                   <FeatureDetailsGrid
                     feature={feature}
                     liveVersion={liveVersion}
-                    segmentOverrides={segmentOverrides}
                   />
 
                   <Grid item xs={12}>
                     <EnvironmentTable
                       feature={feature}
                       environments={environments}
-                    />
-                  </Grid>
-
-                  <Grid item xs={12}>
-                    <SegmentOverridesSection
-                      feature={feature}
-                      details={details}
-                      liveVersion={liveVersion}
                     />
                   </Grid>
                 </Grid>
