@@ -63,6 +63,9 @@ export const EnvironmentTable = ({
   const displayedEnvironments = environments.slice(0, MAX_ENVIRONMENTS);
   const hiddenCount = environments.length - MAX_ENVIRONMENTS;
 
+  // Check if any environment uses v2 versioning
+  const hasVersioning = displayedEnvironments.some(env => env.use_v2_feature_versioning);
+
   return (
     <>
       <Table size="small" className={classes.envTable}>
@@ -72,6 +75,7 @@ export const EnvironmentTable = ({
             <TableCell>Status</TableCell>
             <TableCell>Value</TableCell>
             <TableCell>Overrides</TableCell>
+            {hasVersioning && <TableCell>Version</TableCell>}
             <TableCell>Last updated</TableCell>
           </TableRow>
         </TableHead>
@@ -128,6 +132,13 @@ export const EnvironmentTable = ({
                     )}
                   </Box>
                 </TableCell>
+                {hasVersioning && (
+                  <TableCell>
+                    <Typography variant="body2" color="textSecondary">
+                      {env.use_v2_feature_versioning ? 'v2' : 'v1'}
+                    </Typography>
+                  </TableCell>
+                )}
                 <TableCell>
                   <Typography variant="body2" color="textSecondary">
                     {new Date(feature.created_date).toLocaleDateString()}
