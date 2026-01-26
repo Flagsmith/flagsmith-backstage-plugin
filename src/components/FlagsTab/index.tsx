@@ -9,6 +9,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TablePagination,
   Paper,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
@@ -34,6 +35,8 @@ export const FlagsTab = () => {
   const classes = useStyles();
   const { entity } = useEntity();
   const [searchQuery, setSearchQuery] = useState('');
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(50);
 
   const projectId = entity.metadata.annotations?.['flagsmith.com/project-id'];
   const { project, environments, features, loading, error, client } =
@@ -48,6 +51,20 @@ export const FlagsTab = () => {
         f.description?.toLowerCase().includes(query),
     );
   }, [features, searchQuery]);
+
+  const paginatedFeatures = useMemo(() => {
+    const startIndex = page * rowsPerPage;
+    return filteredFeatures.slice(startIndex, startIndex + rowsPerPage);
+  }, [filteredFeatures, page, rowsPerPage]);
+
+  const handleChangePage = (_event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
   const dashboardUrl = buildProjectUrl(
     projectId || '',
@@ -99,14 +116,19 @@ export const FlagsTab = () => {
             <TableRow>
               <TableCell padding="checkbox" />
               <TableCell>Flag Name</TableCell>
-              <TableCell>Type</TableCell>
+              <TableCell>Tags</TableCell>
+              {environments.slice(0, 6).map(env => (
+                <TableCell key={env.id} align="center">
+                  {env.name}
+                </TableCell>
+              ))}
               <TableCell>Created</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {filteredFeatures.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={4} align="center">
+                <TableCell colSpan={4 + Math.min(environments.length, 6)} align="center">
                   <Typography color="textSecondary">
                     {searchQuery
                       ? 'No flags match your search'
@@ -115,19 +137,29 @@ export const FlagsTab = () => {
                 </TableCell>
               </TableRow>
             ) : (
-              filteredFeatures.map(feature => (
+              paginatedFeatures.map(feature => (
                 <ExpandableRow
                   key={feature.id}
                   feature={feature}
                   environments={environments}
                   client={client}
                   projectId={projectId!}
+                  orgId={project?.organisation || 0}
                 />
               ))
             )}
           </TableBody>
         </Table>
       </TableContainer>
+      <TablePagination
+        component="div"
+        count={filteredFeatures.length}
+        page={page}
+        onPageChange={handleChangePage}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+        rowsPerPageOptions={[10, 25, 50, 100]}
+      />
     </Box>
   );
 };
