@@ -18,6 +18,7 @@ export interface FlagsmithEnvironment {
   name: string;
   api_key: string;
   project: number;
+  use_v2_feature_versioning?: boolean;
 }
 
 export interface FlagsmithFeature {
@@ -45,6 +46,16 @@ export interface FlagsmithFeature {
     name: string;
     email: string;
   }>;
+  group_owners?: Array<{
+    id: number;
+    name: string;
+  }>;
+  created_by?: {
+    id: number;
+    email: string;
+    first_name?: string;
+    last_name?: string;
+  } | null;
   tags?: Array<string>;
   is_server_key_only?: boolean;
   type?: string;
@@ -183,11 +194,15 @@ export class FlagsmithClient {
   async getUsageData(
     orgId: number,
     projectId?: number,
+    environmentId?: number,
   ): Promise<FlagsmithUsageData[]> {
     const baseUrl = await this.getBaseUrl();
     const url = new URL(`${baseUrl}/organisations/${orgId}/usage-data/`);
     if (projectId) {
       url.searchParams.set('project_id', projectId.toString());
+    }
+    if (environmentId) {
+      url.searchParams.set('environment_id', environmentId.toString());
     }
 
     const response = await this.fetchApi.fetch(url.toString());
@@ -197,6 +212,35 @@ export class FlagsmithClient {
     }
 
     return await response.json();
+  }
+
+  /**
+   * Fetch usage data for multiple environments in parallel
+   */
+  async getUsageDataByEnvironments(
+    orgId: number,
+    projectId: number,
+    environments: Array<{ id: number; name: string }>,
+  ): Promise<Map<string, FlagsmithUsageData[]>> {
+    const results = new Map<string, FlagsmithUsageData[]>();
+
+    // Fetch usage data for each environment in parallel
+    const promises = environments.map(async env => {
+      try {
+        const data = await this.getUsageData(orgId, projectId, env.id);
+        return { envName: env.name, data };
+      } catch {
+        // If environment-level filtering isn't supported, return empty
+        return { envName: env.name, data: [] };
+      }
+    });
+
+    const responses = await Promise.all(promises);
+    responses.forEach(({ envName, data }) => {
+      results.set(envName, data);
+    });
+
+    return results;
   }
 
   // Lazy loading methods for feature details
