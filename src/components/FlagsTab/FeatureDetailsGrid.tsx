@@ -41,8 +41,24 @@ export const FeatureDetailsGrid = ({
 }: FeatureDetailsGridProps) => {
   const classes = useStyles();
 
-  // Determine value type based on initial_value
+  // Check if feature is multivariate
+  const isMultivariate = feature.multivariate_options && feature.multivariate_options.length > 0;
+
+  // Determine flag type display
+  const getFlagType = () => {
+    if (isMultivariate) return 'Multivariate';
+    if (feature.type === 'CONFIG') return 'Remote Config';
+    return 'Standard';
+  };
+
+  // Determine value type based on initial_value or multivariate options
   const getValueType = () => {
+    if (isMultivariate && feature.multivariate_options && feature.multivariate_options.length > 0) {
+      const firstOption = feature.multivariate_options[0];
+      if (firstOption.string_value !== null && firstOption.string_value !== undefined) return 'String';
+      if (firstOption.integer_value !== null && firstOption.integer_value !== undefined) return 'Number';
+      if (firstOption.boolean_value !== null && firstOption.boolean_value !== undefined) return 'Boolean';
+    }
     if (feature.type === 'CONFIG' && feature.initial_value !== null && feature.initial_value !== undefined) {
       const value = feature.initial_value;
       if (value === 'true' || value === 'false') return 'Boolean';
@@ -122,7 +138,7 @@ export const FeatureDetailsGrid = ({
           </Typography>
           <Typography variant="body2">ID: {feature.id}</Typography>
           <Typography variant="body2">
-            Flag Type: {feature.type === 'CONFIG' ? 'Config' : 'Standard'}
+            Flag Type: {getFlagType()}
           </Typography>
           <Typography variant="body2">
             Value Type: {getValueType()}

@@ -62,6 +62,14 @@ export interface FlagsmithFeature {
   default_enabled?: boolean;
   is_archived?: boolean;
   initial_value?: string | null;
+  multivariate_options?: Array<{
+    id: number;
+    type: string;
+    integer_value?: number | null;
+    string_value?: string | null;
+    boolean_value?: boolean | null;
+    default_percentage_allocation: number;
+  }>;
 }
 
 export interface FlagsmithFeatureVersion {
