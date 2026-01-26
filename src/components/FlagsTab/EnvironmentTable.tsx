@@ -1,6 +1,7 @@
 import {
   Box,
   Chip,
+  Switch,
   Table,
   TableBody,
   TableCell,
@@ -26,13 +27,13 @@ const useStyles = makeStyles(theme => ({
       textTransform: 'uppercase',
     },
   },
-  statusOn: {
-    color: flagsmithColors.primary,
-    fontWeight: 600,
-  },
-  statusOff: {
-    color: theme.palette.text.secondary,
-    fontWeight: 600,
+  switchOn: {
+    '& .MuiSwitch-switchBase.Mui-checked': {
+      color: flagsmithColors.primary,
+    },
+    '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+      backgroundColor: flagsmithColors.primary,
+    },
   },
   envBadge: {
     fontSize: '0.7rem',
@@ -52,68 +53,98 @@ interface EnvironmentTableProps {
   environments: FlagsmithEnvironment[];
 }
 
+const MAX_ENVIRONMENTS = 10;
+
 export const EnvironmentTable = ({
   feature,
   environments,
 }: EnvironmentTableProps) => {
   const classes = useStyles();
+  const displayedEnvironments = environments.slice(0, MAX_ENVIRONMENTS);
+  const hiddenCount = environments.length - MAX_ENVIRONMENTS;
 
   return (
-    <Table size="small" className={classes.envTable}>
-      <TableHead>
-        <TableRow>
-          <TableCell>Environment</TableCell>
-          <TableCell>Status</TableCell>
-          <TableCell>Value</TableCell>
-          <TableCell>Last updated</TableCell>
-        </TableRow>
-      </TableHead>
-      <TableBody>
-        {environments.map(env => {
-          const envState = feature.environment_state?.find(s => s.id === env.id);
-          const enabled = envState?.enabled ?? feature.default_enabled ?? false;
-          const segmentCount = feature.num_segment_overrides ?? 0;
-          const value = feature.type === 'CONFIG' ? feature.initial_value : null;
+    <>
+      <Table size="small" className={classes.envTable}>
+        <TableHead>
+          <TableRow>
+            <TableCell>Environment</TableCell>
+            <TableCell>Status</TableCell>
+            <TableCell>Value</TableCell>
+            <TableCell>Overrides</TableCell>
+            <TableCell>Last updated</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {displayedEnvironments.map(env => {
+            const envState = feature.environment_state?.find(s => s.id === env.id);
+            const enabled = envState?.enabled ?? feature.default_enabled ?? false;
+            const segmentCount = feature.num_segment_overrides ?? 0;
+            const identityCount = feature.num_identity_overrides ?? 0;
+            const value = feature.type === 'CONFIG' ? feature.initial_value : null;
 
-          return (
-            <TableRow key={env.id}>
-              <TableCell>
-                <Box>
+            return (
+              <TableRow key={env.id}>
+                <TableCell>
                   <Typography variant="body2" style={{ fontWeight: 500 }}>
                     {env.name}
                   </Typography>
-                  {segmentCount > 0 && (
-                    <Chip
-                      label={`${segmentCount} segment${segmentCount > 1 ? 's' : ''}`}
-                      size="small"
-                      variant="outlined"
-                      className={classes.envBadge}
-                    />
-                  )}
-                </Box>
-              </TableCell>
-              <TableCell>
-                <Typography
-                  variant="body2"
-                  className={enabled ? classes.statusOn : classes.statusOff}
-                >
-                  {enabled ? 'ON' : 'OFF'}
-                </Typography>
-              </TableCell>
-              <TableCell>
-                <Typography variant="body2" className={classes.valueCell}>
-                  {value !== null && value !== undefined ? `"${value}"` : '-'}
-                </Typography>
-              </TableCell>
-              <TableCell>
-                <Typography variant="body2" color="textSecondary">
-                  {new Date(feature.created_date).toLocaleDateString()}
-                </Typography>
-              </TableCell>
-            </TableRow>
-          );
-        })}
-      </TableBody>
-    </Table>
+                </TableCell>
+                <TableCell>
+                  <Switch
+                    checked={enabled}
+                    size="small"
+                    disabled
+                    className={classes.switchOn}
+                  />
+                </TableCell>
+                <TableCell>
+                  <Typography variant="body2" className={classes.valueCell}>
+                    {value !== null && value !== undefined ? `"${value}"` : '-'}
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  <Box display="flex" flexWrap="wrap" style={{ gap: 4 }}>
+                    {segmentCount > 0 && (
+                      <Chip
+                        label={`${segmentCount} segment${segmentCount > 1 ? 's' : ''}`}
+                        size="small"
+                        variant="outlined"
+                        className={classes.envBadge}
+                      />
+                    )}
+                    {identityCount > 0 && (
+                      <Chip
+                        label={`${identityCount} identit${identityCount > 1 ? 'ies' : 'y'}`}
+                        size="small"
+                        variant="outlined"
+                        className={classes.envBadge}
+                      />
+                    )}
+                    {segmentCount === 0 && identityCount === 0 && (
+                      <Typography variant="body2" color="textSecondary">
+                        -
+                      </Typography>
+                    )}
+                  </Box>
+                </TableCell>
+                <TableCell>
+                  <Typography variant="body2" color="textSecondary">
+                    {new Date(feature.created_date).toLocaleDateString()}
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
+      {hiddenCount > 0 && (
+        <Box mt={1}>
+          <Typography variant="body2" color="textSecondary">
+            +{hiddenCount} more environment{hiddenCount > 1 ? 's' : ''} not shown
+          </Typography>
+        </Box>
+      )}
+    </>
   );
 };
