@@ -24,6 +24,7 @@ import {
 import { FlagsmithLink } from '../shared';
 import { buildFlagUrl } from '../../theme/flagsmithTheme';
 import { EnvironmentTable } from './EnvironmentTable';
+import { FeatureAnalyticsSection } from './FeatureAnalyticsSection';
 import { FeatureDetailsGrid } from './FeatureDetailsGrid';
 import { SegmentOverridesSection } from './SegmentOverridesSection';
 
@@ -63,6 +64,7 @@ interface ExpandableRowProps {
   environments: FlagsmithEnvironment[];
   client: FlagsmithClient;
   projectId: string;
+  orgId: number;
 }
 
 export const ExpandableRow = ({
@@ -70,6 +72,7 @@ export const ExpandableRow = ({
   environments,
   client,
   projectId,
+  orgId,
 }: ExpandableRowProps) => {
   const classes = useStyles();
   const [open, setOpen] = useState(false);
@@ -215,6 +218,15 @@ export const ExpandableRow = ({
               )}
               {!loadingDetails && !detailsError && (
                 <Grid container spacing={2}>
+                  <Grid item xs={12}>
+                    <FeatureAnalyticsSection
+                      client={client}
+                      orgId={orgId}
+                      projectId={parseInt(projectId, 10)}
+                      environments={environments}
+                    />
+                  </Grid>
+
                   <FeatureDetailsGrid
                     feature={feature}
                     liveVersion={liveVersion}
