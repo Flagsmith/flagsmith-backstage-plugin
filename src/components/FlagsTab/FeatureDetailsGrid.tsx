@@ -1,8 +1,9 @@
 import { Box, Chip, Grid, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import ArchiveIcon from '@material-ui/icons/Archive';
+import ScheduleIcon from '@material-ui/icons/Schedule';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
-import { FlagsmithFeature } from '../../api/FlagsmithClient';
+import { FlagsmithFeature, FlagsmithFeatureVersion } from '../../api/FlagsmithClient';
 import { flagsmithColors } from '../../theme/flagsmithTheme';
 
 const useStyles = makeStyles(theme => ({
@@ -24,6 +25,23 @@ const useStyles = makeStyles(theme => ({
     backgroundColor: flagsmithColors.secondary,
     color: 'white',
   },
+  scheduledCard: {
+    padding: theme.spacing(1.5),
+    marginBottom: theme.spacing(1),
+    border: `1px solid ${theme.palette.warning.main}`,
+    borderRadius: theme.shape.borderRadius,
+    backgroundColor: `${theme.palette.warning.light}20`,
+  },
+  scheduledHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing(0.5),
+    color: theme.palette.warning.dark,
+  },
+  scheduleIcon: {
+    fontSize: '1.2rem',
+    color: theme.palette.warning.main,
+  },
 }));
 
 type LiveVersionInfo = FlagsmithFeature['live_version'];
@@ -32,12 +50,14 @@ interface FeatureDetailsGridProps {
   feature: FlagsmithFeature;
   liveVersion: LiveVersionInfo;
   segmentOverrides: number;
+  scheduledVersion?: FlagsmithFeatureVersion | null;
 }
 
 export const FeatureDetailsGrid = ({
   feature,
   liveVersion,
   segmentOverrides,
+  scheduledVersion,
 }: FeatureDetailsGridProps) => {
   const classes = useStyles();
 
@@ -89,6 +109,28 @@ export const FeatureDetailsGrid = ({
                 size="small"
                 className={`${classes.badgeChip} ${classes.archivedChip}`}
               />
+            )}
+          </Box>
+        </Grid>
+      )}
+
+      {/* Scheduled changes card */}
+      {scheduledVersion && scheduledVersion.live_from && (
+        <Grid item xs={12} md={4}>
+          <Box className={classes.scheduledCard}>
+            <Box className={classes.scheduledHeader}>
+              <ScheduleIcon className={classes.scheduleIcon} />
+              <Typography variant="subtitle2">
+                Scheduled Change
+              </Typography>
+            </Box>
+            <Typography variant="body2">
+              Scheduled for: {new Date(scheduledVersion.live_from).toLocaleString()}
+            </Typography>
+            {scheduledVersion.published_by && (
+              <Typography variant="body2" color="textSecondary">
+                By: {scheduledVersion.published_by}
+              </Typography>
             )}
           </Box>
         </Grid>

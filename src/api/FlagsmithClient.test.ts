@@ -140,6 +140,7 @@ describe('FlagsmithClient', () => {
       expect(result.liveVersion).toEqual(versions[0]);
       expect(result.featureState).toEqual(states);
       expect(result.segmentOverrides).toBe(1);
+      expect(result.scheduledVersion).toBeNull();
     });
 
     it('returns nulls when no live version', async () => {
@@ -150,6 +151,42 @@ describe('FlagsmithClient', () => {
       expect(result.liveVersion).toBeNull();
       expect(result.featureState).toBeNull();
       expect(result.segmentOverrides).toBe(0);
+      expect(result.scheduledVersion).toBeNull();
+    });
+
+    it('detects scheduled version with future live_from date', async () => {
+      const futureDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+      const versions = [
+        { uuid: 'v1', is_live: true, published: true, live_from: '2024-01-01T00:00:00Z' },
+        { uuid: 'v2', is_live: false, published: true, live_from: futureDate },
+      ];
+      const states = [{ id: 1, enabled: true, feature_segment: null }];
+
+      mockFetch
+        .mockResolvedValueOnce(mockOk({ results: versions }))
+        .mockResolvedValueOnce(mockOk(states));
+
+      const result = await client.getFeatureDetails(1, 100);
+
+      expect(result.liveVersion).toEqual(versions[0]);
+      expect(result.scheduledVersion).toEqual(versions[1]);
+    });
+
+    it('ignores past live_from dates for scheduled version', async () => {
+      const pastDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      const versions = [
+        { uuid: 'v1', is_live: true, published: true },
+        { uuid: 'v2', is_live: false, published: true, live_from: pastDate },
+      ];
+      const states = [{ id: 1, enabled: true, feature_segment: null }];
+
+      mockFetch
+        .mockResolvedValueOnce(mockOk({ results: versions }))
+        .mockResolvedValueOnce(mockOk(states));
+
+      const result = await client.getFeatureDetails(1, 100);
+
+      expect(result.scheduledVersion).toBeNull();
     });
   });
 });

@@ -128,6 +128,9 @@ const mockFeatures = [
   },
 ];
 
+// Helper to create a future date (7 days from now)
+const futureDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+
 const mockFeatureVersions: Record<number, any[]> = {
   1001: [
     {
@@ -136,6 +139,14 @@ const mockFeatureVersions: Record<number, any[]> = {
       live_from: '2024-02-01T10:00:00Z',
       published: true,
       published_by: 'John Doe',
+    },
+    // Scheduled change for dark_mode - goes live in 7 days
+    {
+      uuid: 'v2-dark-mode-uuid',
+      is_live: false,
+      live_from: futureDate,
+      published: true,
+      published_by: 'Jane Smith',
     },
   ],
   1002: [

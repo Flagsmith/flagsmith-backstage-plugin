@@ -104,6 +104,7 @@ export interface FlagsmithFeatureDetails {
   liveVersion: FlagsmithFeatureVersion | null;
   featureState: FlagsmithFeatureState[] | null;
   segmentOverrides: number;
+  scheduledVersion: FlagsmithFeatureVersion | null;
 }
 
 export interface FlagsmithUsageData {
@@ -296,6 +297,14 @@ export class FlagsmithClient {
     const versions = await this.getFeatureVersions(environmentId, featureId);
     const liveVersion = versions.find(v => v.is_live) || null;
 
+    // Find scheduled version (future live_from date, not yet live)
+    const now = new Date();
+    const scheduledVersion = versions.find(v =>
+      !v.is_live &&
+      v.live_from &&
+      new Date(v.live_from) > now
+    ) || null;
+
     let featureState: FlagsmithFeatureState[] | null = null;
     let segmentOverrides = 0;
 
@@ -314,6 +323,7 @@ export class FlagsmithClient {
       liveVersion,
       featureState,
       segmentOverrides,
+      scheduledVersion,
     };
   }
 }

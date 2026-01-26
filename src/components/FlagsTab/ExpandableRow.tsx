@@ -106,6 +106,7 @@ export const ExpandableRow = ({
   };
 
   const liveVersion = details?.liveVersion || feature.live_version;
+  const scheduledVersion = details?.scheduledVersion || null;
   const segmentOverrides =
     details?.segmentOverrides ?? feature.num_segment_overrides ?? 0;
   const flagUrl = buildFlagUrl(
@@ -231,6 +232,7 @@ export const ExpandableRow = ({
                     feature={feature}
                     liveVersion={liveVersion}
                     segmentOverrides={segmentOverrides}
+                    scheduledVersion={scheduledVersion}
                   />
 
                   <Grid item xs={12}>
