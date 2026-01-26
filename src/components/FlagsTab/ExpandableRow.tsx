@@ -8,10 +8,13 @@ import {
   TableRow,
   IconButton,
   Collapse,
+  Chip,
+  Switch,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import KeyboardArrowDown from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
+import { flagsmithColors } from '../../theme/flagsmithTheme';
 import {
   FlagsmithClient,
   FlagsmithEnvironment,
@@ -33,6 +36,25 @@ const useStyles = makeStyles(theme => ({
   expandedContent: {
     backgroundColor: theme.palette.background.default,
     padding: theme.spacing(2),
+  },
+  clickableRow: {
+    cursor: 'pointer',
+  },
+  tagChip: {
+    fontSize: '0.7rem',
+    height: 20,
+    marginRight: theme.spacing(0.5),
+  },
+  tagsCell: {
+    maxWidth: 200,
+  },
+  switchOn: {
+    '& .MuiSwitch-switchBase.Mui-checked': {
+      color: flagsmithColors.primary,
+    },
+    '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+      backgroundColor: flagsmithColors.primary,
+    },
   },
 }));
 
@@ -89,13 +111,21 @@ export const ExpandableRow = ({
     feature.id,
   );
 
+  const displayedEnvs = environments.slice(0, 6);
+  const tags = feature.tags || [];
+  const displayTags = tags.slice(0, 3);
+  const remainingTagsCount = tags.length - 3;
+
   return (
     <>
-      <TableRow hover>
+      <TableRow hover className={classes.clickableRow} onClick={handleToggle}>
         <TableCell padding="checkbox">
           <IconButton
             size="small"
-            onClick={handleToggle}
+            onClick={e => {
+              e.stopPropagation();
+              handleToggle();
+            }}
             aria-label={open ? `Collapse ${feature.name}` : `Expand ${feature.name}`}
             aria-expanded={open}
           >
@@ -104,7 +134,11 @@ export const ExpandableRow = ({
         </TableCell>
         <TableCell>
           <Box className={classes.flagName}>
-            <FlagsmithLink href={flagUrl} tooltip="Open in Flagsmith">
+            <FlagsmithLink
+              href={flagUrl}
+              tooltip="Open in Flagsmith"
+              onClick={e => e.stopPropagation()}
+            >
               <Typography variant="subtitle2">{feature.name}</Typography>
             </FlagsmithLink>
           </Box>
@@ -116,9 +150,41 @@ export const ExpandableRow = ({
             </Typography>
           )}
         </TableCell>
-        <TableCell>
-          <Typography variant="body2">{feature.type || 'FLAG'}</Typography>
+        <TableCell className={classes.tagsCell}>
+          <Box display="flex" flexWrap="wrap" style={{ gap: 2 }}>
+            {displayTags.map((tag, index) => (
+              <Chip
+                key={index}
+                label={tag}
+                size="small"
+                variant="outlined"
+                className={classes.tagChip}
+              />
+            ))}
+            {remainingTagsCount > 0 && (
+              <Chip
+                label={`+${remainingTagsCount}`}
+                size="small"
+                variant="outlined"
+                className={classes.tagChip}
+              />
+            )}
+          </Box>
         </TableCell>
+        {displayedEnvs.map(env => {
+          const envState = feature.environment_state?.find(s => s.id === env.id);
+          const enabled = envState?.enabled ?? feature.default_enabled ?? false;
+          return (
+            <TableCell key={env.id} align="center">
+              <Switch
+                checked={enabled}
+                size="small"
+                disabled
+                className={classes.switchOn}
+              />
+            </TableCell>
+          );
+        })}
         <TableCell>
           <Typography variant="body2">
             {new Date(feature.created_date).toLocaleDateString()}
@@ -127,7 +193,7 @@ export const ExpandableRow = ({
       </TableRow>
 
       <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={4}>
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={4 + displayedEnvs.length}>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box className={classes.expandedContent}>
               {loadingDetails && (

@@ -30,6 +30,7 @@ interface FlagsmithLinkProps {
   children?: React.ReactNode;
   tooltip?: string;
   iconOnly?: boolean;
+  onClick?: (event: React.MouseEvent) => void;
 }
 
 /**
@@ -41,6 +42,7 @@ export const FlagsmithLink = ({
   children,
   tooltip = 'Open in Flagsmith',
   iconOnly = false,
+  onClick,
 }: FlagsmithLinkProps) => {
   const classes = useStyles();
 
@@ -54,6 +56,7 @@ export const FlagsmithLink = ({
           rel="noopener noreferrer"
           size="small"
           aria-label={tooltip}
+          onClick={onClick}
         >
           <LaunchIcon fontSize="small" aria-hidden="true" />
         </IconButton>
@@ -69,6 +72,7 @@ export const FlagsmithLink = ({
         target="_blank"
         rel="noopener noreferrer"
         aria-label={`${tooltip} (opens in new tab)`}
+        onClick={onClick}
       >
         {children}
         <LaunchIcon className={classes.icon} aria-hidden="true" />
