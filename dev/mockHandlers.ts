@@ -14,119 +14,115 @@ const mockEnvironments = [
     name: 'Development',
     api_key: 'dev_api_key_123',
     project: 31465,
+    use_v2_feature_versioning: true,
   },
   {
     id: 102,
     name: 'Staging',
     api_key: 'staging_api_key_456',
     project: 31465,
+    use_v2_feature_versioning: true,
   },
   {
     id: 103,
     name: 'Production',
     api_key: 'prod_api_key_789',
     project: 31465,
+    use_v2_feature_versioning: false, // Production still on v1
   },
 ];
 
-const mockFeatures = [
-  {
-    id: 1001,
-    name: 'dark_mode',
-    description: 'Enable dark mode theme for the application',
-    created_date: '2024-02-01T09:00:00Z',
-    project: 31465,
-    default_enabled: true,
-    type: 'FLAG',
-    is_archived: false,
-    tags: ['ui', 'theme'],
-    owners: [{ id: 1, name: 'John Doe', email: 'john@example.com' }],
-    num_segment_overrides: 1,
-    num_identity_overrides: 5,
-    // Multi-environment status
-    environment_state: [
-      { id: 101, enabled: true },   // Dev - enabled
-      { id: 102, enabled: true },   // Staging - enabled
-      { id: 103, enabled: false },  // Prod - disabled (not yet rolled out)
-    ],
-  },
-  {
-    id: 1002,
-    name: 'new_checkout_flow',
-    description: 'A/B test for the new checkout experience',
-    created_date: '2024-03-10T14:30:00Z',
-    project: 31465,
-    default_enabled: false,
-    type: 'FLAG',
-    is_archived: false,
-    tags: ['checkout', 'experiment'],
-    owners: [{ id: 2, name: 'Jane Smith', email: 'jane@example.com' }],
-    num_segment_overrides: 2,
-    num_identity_overrides: 0,
-    environment_state: [
-      { id: 101, enabled: true },   // Dev - enabled
-      { id: 102, enabled: false },  // Staging - disabled
-      { id: 103, enabled: false },  // Prod - disabled
-    ],
-  },
-  {
-    id: 1003,
-    name: 'api_rate_limit',
-    description: 'API rate limiting configuration',
-    created_date: '2024-01-20T11:15:00Z',
-    project: 31465,
-    default_enabled: true,
-    type: 'CONFIG',
-    is_archived: false,
-    tags: ['api', 'performance'],
-    owners: [],
-    num_segment_overrides: 0,
-    num_identity_overrides: 0,
-    environment_state: [
-      { id: 101, enabled: true },   // Dev - enabled
-      { id: 102, enabled: true },   // Staging - enabled
-      { id: 103, enabled: true },   // Prod - enabled
-    ],
-  },
-  {
-    id: 1004,
-    name: 'beta_features',
-    description: 'Enable beta features for selected users',
-    created_date: '2024-04-05T16:45:00Z',
-    project: 31465,
-    default_enabled: false,
-    type: 'FLAG',
-    is_archived: false,
-    tags: ['beta'],
-    owners: [{ id: 1, name: 'John Doe', email: 'john@example.com' }],
-    num_segment_overrides: 3,
-    num_identity_overrides: 12,
-    environment_state: [
-      { id: 101, enabled: true },   // Dev - enabled
-      { id: 102, enabled: true },   // Staging - enabled
-      { id: 103, enabled: true },   // Prod - enabled (for beta users only via segment)
-    ],
-  },
-  {
-    id: 1005,
-    name: 'maintenance_mode',
-    description: 'Put the application in maintenance mode',
-    created_date: '2024-02-28T08:00:00Z',
-    project: 31465,
-    default_enabled: false,
-    type: 'FLAG',
-    is_archived: false,
-    tags: ['ops'],
-    owners: [],
-    num_segment_overrides: 0,
-    num_identity_overrides: 0,
-    environment_state: [
-      { id: 101, enabled: false },  // Dev - disabled
-      { id: 102, enabled: false },  // Staging - disabled
-      { id: 103, enabled: false },  // Prod - disabled
-    ],
-  },
+// Feature name templates for generating mock data
+const featureTemplates = [
+  { name: 'dark_mode', desc: 'Enable dark mode theme for the application', tags: ['ui', 'theme'], type: 'FLAG' },
+  { name: 'new_checkout_flow', desc: 'A/B test for the new checkout experience', tags: ['checkout', 'experiment'], type: 'FLAG' },
+  { name: 'api_rate_limit', desc: 'API rate limiting configuration', tags: ['api', 'performance'], type: 'CONFIG' },
+  { name: 'beta_features', desc: 'Enable beta features for selected users', tags: ['beta'], type: 'FLAG' },
+  { name: 'maintenance_mode', desc: 'Put the application in maintenance mode', tags: ['ops'], type: 'FLAG' },
+  { name: 'notifications_v2', desc: 'New notification system', tags: ['notifications', 'v2'], type: 'FLAG' },
+  { name: 'payment_gateway', desc: 'Enable new payment gateway integration', tags: ['payments', 'integration'], type: 'FLAG' },
+  { name: 'cache_ttl', desc: 'Cache time-to-live configuration', tags: ['cache', 'performance'], type: 'CONFIG' },
+  { name: 'feature_analytics', desc: 'Track feature usage analytics', tags: ['analytics'], type: 'FLAG' },
+  { name: 'user_onboarding', desc: 'New user onboarding flow', tags: ['onboarding', 'ux'], type: 'FLAG' },
+  { name: 'search_v3', desc: 'Enhanced search functionality', tags: ['search', 'v3'], type: 'FLAG' },
+  { name: 'recommendation_engine', desc: 'AI-powered recommendations', tags: ['ai', 'recommendations'], type: 'FLAG' },
+  { name: 'export_csv', desc: 'Enable CSV export functionality', tags: ['export'], type: 'FLAG' },
+  { name: 'bulk_operations', desc: 'Enable bulk edit operations', tags: ['bulk', 'admin'], type: 'FLAG' },
+  { name: 'audit_logging', desc: 'Enhanced audit logging', tags: ['security', 'audit'], type: 'FLAG' },
 ];
+
+// Generate 55 mock features
+const generateMockFeatures = () => {
+  const features = [];
+  for (let i = 0; i < 55; i++) {
+    const template = featureTemplates[i % featureTemplates.length];
+    const suffix = i < featureTemplates.length ? '' : `_${Math.floor(i / featureTemplates.length) + 1}`;
+    const id = 1001 + i;
+    const daysAgo = Math.floor(Math.random() * 365);
+    const date = new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000);
+
+    // Determine initial_value for CONFIG type features
+    const configValues = ['100', 'enabled', '{"key": "value"}'];
+    const initialValue = template.type === 'CONFIG' ? configValues[i % 3] : null;
+
+    // Add multivariate options for a few features
+    const multivariateOptions = i === 5 ? [
+      { id: 1, type: 'string', string_value: 'variant_a', integer_value: null, boolean_value: null, default_percentage_allocation: 50 },
+      { id: 2, type: 'string', string_value: 'variant_b', integer_value: null, boolean_value: null, default_percentage_allocation: 50 },
+    ] : undefined;
+
+    features.push({
+      id,
+      name: `${template.name}${suffix}`,
+      description: template.desc,
+      created_date: date.toISOString(),
+      project: 31465,
+      default_enabled: Math.random() > 0.5,
+      type: template.type,
+      is_archived: i === 10, // One archived flag for demo
+      is_server_key_only: i === 15, // One server-side only flag for demo
+      tags: template.tags,
+      owners: i % 3 === 0 ? [{ id: 1, name: 'John Doe', email: 'john@example.com' }] : [],
+      group_owners: i % 5 === 0 ? [{ id: 1, name: 'Engineering Team' }] : [],
+      created_by: { id: 1, email: 'creator@example.com', first_name: 'Alice', last_name: 'Smith' },
+      num_segment_overrides: Math.floor(Math.random() * 5),
+      num_identity_overrides: Math.floor(Math.random() * 20),
+      initial_value: initialValue,
+      multivariate_options: multivariateOptions,
+      environment_state: [
+        { id: 101, enabled: Math.random() > 0.3 },
+        { id: 102, enabled: Math.random() > 0.4 },
+        { id: 103, enabled: Math.random() > 0.6 },
+      ],
+    });
+  }
+
+  // Add a special feature on "page 2" (index 51) that's easy to search for
+  features[51] = {
+    id: 9999,
+    name: 'zebra_stripe_mode',
+    description: 'A unique feature on page 2 - search for "zebra" to find it',
+    created_date: '2024-06-15T10:00:00Z',
+    project: 31465,
+    default_enabled: true,
+    type: 'FLAG',
+    is_archived: false,
+    is_server_key_only: false,
+    tags: ['unique', 'page2'],
+    owners: [{ id: 2, name: 'Jane Smith', email: 'jane@example.com' }],
+    num_segment_overrides: 1,
+    num_identity_overrides: 3,
+    environment_state: [
+      { id: 101, enabled: true },
+      { id: 102, enabled: true },
+      { id: 103, enabled: false },
+    ],
+  };
+
+  return features;
+};
+
+const mockFeatures = generateMockFeatures();
 
 // Helper to create a future date (7 days from now)
 const futureDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
@@ -272,64 +268,28 @@ const mockFeatureStates: Record<string, any[]> = {
   ],
 };
 
-const mockUsageData = [
-  {
-    flags: 15420,
-    identities: 3250,
-    traits: 8900,
-    environment_document: 450,
-    day: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+// Generate usage data for each environment with distinct values (0-500 range)
+const generateUsageData = (envId: number) => {
+  // Different data patterns per environment to make lines visually distinct
+  const envData: Record<number, number[]> = {
+    101: [50, 80, 65, 95, 120, 90, 75],      // Development - lowest, volatile (50-120)
+    102: [150, 170, 180, 200, 195, 210, 185], // Staging - medium range (150-210)
+    103: [350, 380, 360, 420, 400, 450, 410], // Production - highest, stable (350-450)
+  };
+  const flags = envData[envId] || [200, 220, 210, 240, 230, 250, 220];
+
+  return Array.from({ length: 7 }, (_, i) => ({
+    flags: flags[i],
+    identities: Math.round(flags[i] * 0.2),
+    traits: Math.round(flags[i] * 0.5),
+    environment_document: Math.round(flags[i] * 0.03),
+    day: new Date(Date.now() - (6 - i) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     labels: { client_application_name: 'web-app', client_application_version: '1.0.0', user_agent: null },
-  },
-  {
-    flags: 16800,
-    identities: 3400,
-    traits: 9200,
-    environment_document: 480,
-    day: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    labels: { client_application_name: 'web-app', client_application_version: '1.0.0', user_agent: null },
-  },
-  {
-    flags: 14200,
-    identities: 3100,
-    traits: 8500,
-    environment_document: 420,
-    day: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    labels: { client_application_name: 'web-app', client_application_version: '1.0.0', user_agent: null },
-  },
-  {
-    flags: 17500,
-    identities: 3600,
-    traits: 9800,
-    environment_document: 510,
-    day: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    labels: { client_application_name: 'web-app', client_application_version: '1.0.0', user_agent: null },
-  },
-  {
-    flags: 18200,
-    identities: 3750,
-    traits: 10100,
-    environment_document: 530,
-    day: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    labels: { client_application_name: 'web-app', client_application_version: '1.0.0', user_agent: null },
-  },
-  {
-    flags: 16900,
-    identities: 3500,
-    traits: 9400,
-    environment_document: 490,
-    day: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    labels: { client_application_name: 'web-app', client_application_version: '1.0.0', user_agent: null },
-  },
-  {
-    flags: 15800,
-    identities: 3300,
-    traits: 9000,
-    environment_document: 460,
-    day: new Date().toISOString().split('T')[0],
-    labels: { client_application_name: 'web-app', client_application_version: '1.0.0', user_agent: null },
-  },
-];
+  }));
+};
+
+// Default usage data (for requests without environment_id)
+const mockUsageData = generateUsageData(103);
 
 export const handlers = [
   // Get project
@@ -361,8 +321,12 @@ export const handlers = [
     return res(ctx.json(states));
   }),
 
-  // Get usage data
+  // Get usage data - returns different data per environment
   rest.get('*/proxy/flagsmith/organisations/:orgId/usage-data/', (req, res, ctx) => {
+    const environmentId = req.url.searchParams.get('environment_id');
+    if (environmentId) {
+      return res(ctx.json(generateUsageData(parseInt(environmentId, 10))));
+    }
     return res(ctx.json(mockUsageData));
   }),
 ];
