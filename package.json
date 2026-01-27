@@ -27,7 +27,10 @@
   },
   "backstage": {
     "role": "frontend-plugin",
-    "pluginId": "flagsmith"
+    "pluginId": "flagsmith",
+    "pluginPackages": [
+      "@flagsmith/backstage-plugin"
+    ]
   },
   "sideEffects": false,
   "scripts": {
