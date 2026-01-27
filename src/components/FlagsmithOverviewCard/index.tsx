@@ -14,7 +14,7 @@ import {
 import { makeStyles } from '@material-ui/core/styles';
 import { InfoCard } from '@backstage/core-components';
 import { useEntity } from '@backstage/plugin-catalog-react';
-import { FlagsmithLink, MiniPagination, LoadingState } from '../shared';
+import { FlagsmithLink, MiniPagination, LoadingState, ErrorState } from '../shared';
 import { buildProjectUrl } from '../../theme/flagsmithTheme';
 import { useFlagsmithProject } from '../../hooks';
 import { calculateFeatureStats, paginate } from '../../utils';
@@ -50,9 +50,7 @@ export const FlagsmithOverviewCard = () => {
   if (error) {
     return (
       <InfoCard title="Flagsmith Flags">
-        <Box p={2}>
-          <Typography color="error">Error: {error}</Typography>
-        </Box>
+        <ErrorState message={error} />
       </InfoCard>
     );
   }

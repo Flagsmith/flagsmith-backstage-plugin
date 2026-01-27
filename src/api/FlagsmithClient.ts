@@ -229,7 +229,7 @@ export class FlagsmithClient {
   async getUsageDataByEnvironments(
     orgId: number,
     projectId: number,
-    environments: Array<{ id: number; name: string }>,
+    environments: Pick<FlagsmithEnvironment, 'id' | 'name'>[],
   ): Promise<Map<string, FlagsmithUsageData[]>> {
     const results = new Map<string, FlagsmithUsageData[]>();
 

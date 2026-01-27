@@ -14,7 +14,7 @@ import {
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { useEntity } from '@backstage/plugin-catalog-react';
-import { SearchInput, FlagsmithLink, LoadingState } from '../shared';
+import { SearchInput, FlagsmithLink, LoadingState, ErrorState } from '../shared';
 import { buildProjectUrl } from '../../theme/flagsmithTheme';
 import { useFlagsmithProject } from '../../hooks';
 import {
@@ -92,13 +92,10 @@ export const FlagsTab = () => {
   if (error) {
     return (
       <Box p={3}>
-        <Typography color="error">Error: {error}</Typography>
-        {!projectId && (
-          <Typography variant="body2" className={classes.errorHint}>
-            Add a <code>flagsmith.com/project-id</code> annotation to this
-            entity to view feature flags.
-          </Typography>
-        )}
+        <ErrorState
+          message={error}
+          hint={!projectId ? 'Add a flagsmith.com/project-id annotation to this entity to view feature flags.' : undefined}
+        />
       </Box>
     );
   }
