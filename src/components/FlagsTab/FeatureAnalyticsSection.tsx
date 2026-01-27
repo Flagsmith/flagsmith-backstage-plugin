@@ -16,6 +16,13 @@ import {
   FlagsmithEnvironment,
   FlagsmithUsageData,
 } from '../../api/FlagsmithClient';
+import {
+  CHART_CONFIG,
+  MAX_TABLE_ENVIRONMENTS,
+  getEnvColor,
+} from '../../constants';
+import { getErrorMessage } from '../../utils/flagTypeHelpers';
+import { formatShortDate } from '../../utils/dateFormatters';
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -26,7 +33,7 @@ const useStyles = makeStyles(theme => ({
   },
   chartContainer: {
     width: '100%',
-    height: 250,
+    height: CHART_CONFIG.HEIGHT,
     marginTop: theme.spacing(1),
   },
   noData: {
@@ -45,25 +52,6 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-const ENV_COLORS: Record<string, string> = {
-  development: '#4caf50',
-  dev: '#4caf50',
-  staging: '#ff9800',
-  stage: '#ff9800',
-  production: '#f44336',
-  prod: '#f44336',
-};
-
-const DEFAULT_COLORS = ['#2196f3', '#9c27b0', '#00bcd4', '#795548', '#607d8b', '#e91e63'];
-
-const getEnvColor = (envName: string, index: number): string => {
-  const lowerName = envName.toLowerCase();
-  for (const [key, color] of Object.entries(ENV_COLORS)) {
-    if (lowerName.includes(key)) return color;
-  }
-  return DEFAULT_COLORS[index % DEFAULT_COLORS.length];
-};
-
 interface ChartDataPoint {
   date: string;
   [envName: string]: number | string;
@@ -75,6 +63,36 @@ interface FeatureAnalyticsSectionProps {
   projectId: number;
   environments: FlagsmithEnvironment[];
 }
+
+/**
+ * Transform usage data by environment into chart-friendly format
+ */
+const transformUsageData = (
+  usageByEnv: Map<string, FlagsmithUsageData[]>,
+): { chartData: ChartDataPoint[]; envNames: string[] } => {
+  const dataByDate = new Map<string, ChartDataPoint>();
+  const envNames: string[] = [];
+
+  usageByEnv.forEach((data: FlagsmithUsageData[], envName: string) => {
+    envNames.push(envName);
+    data.forEach(item => {
+      const date = formatShortDate(item.day);
+      if (!dataByDate.has(date)) {
+        dataByDate.set(date, { date });
+      }
+      const point = dataByDate.get(date)!;
+      point[envName] = item.flags ?? 0;
+    });
+  });
+
+  const sortedData = Array.from(dataByDate.values()).sort((a, b) => {
+    const dateA = new Date(a.date);
+    const dateB = new Date(b.date);
+    return dateA.getTime() - dateB.getTime();
+  });
+
+  return { chartData: sortedData, envNames };
+};
 
 export const FeatureAnalyticsSection = ({
   client,
@@ -99,40 +117,21 @@ export const FeatureAnalyticsSection = ({
         setLoading(true);
         setError(null);
 
+        const displayedEnvs = environments
+          .slice(0, MAX_TABLE_ENVIRONMENTS)
+          .map(e => ({ id: e.id, name: e.name }));
+
         const usageByEnv = await client.getUsageDataByEnvironments(
           orgId,
           projectId,
-          environments.slice(0, 6).map(e => ({ id: e.id, name: e.name })),
+          displayedEnvs,
         );
 
-        const dataByDate = new Map<string, ChartDataPoint>();
-        const envNamesList: string[] = [];
-
-        usageByEnv.forEach((data: FlagsmithUsageData[], envName: string) => {
-          envNamesList.push(envName);
-          data.forEach(item => {
-            const date = new Date(item.day).toLocaleDateString('en-US', {
-              month: 'short',
-              day: 'numeric',
-            });
-            if (!dataByDate.has(date)) {
-              dataByDate.set(date, { date });
-            }
-            const point = dataByDate.get(date)!;
-            point[envName] = item.flags ?? 0;
-          });
-        });
-
-        const sortedData = Array.from(dataByDate.values()).sort((a, b) => {
-          const dateA = new Date(a.date);
-          const dateB = new Date(b.date);
-          return dateA.getTime() - dateB.getTime();
-        });
-
-        setChartData(sortedData);
-        setEnvNames(envNamesList);
+        const { chartData: data, envNames: names } = transformUsageData(usageByEnv);
+        setChartData(data);
+        setEnvNames(names);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load analytics');
+        setError(getErrorMessage(err, 'Failed to load analytics'));
       } finally {
         setLoading(false);
       }
@@ -183,7 +182,7 @@ export const FeatureAnalyticsSection = ({
       </Typography>
       <Box className={classes.chartContainer}>
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={chartData} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
+          <LineChart data={chartData} margin={CHART_CONFIG.MARGIN}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="date" fontSize={12} />
             <YAxis fontSize={12} />

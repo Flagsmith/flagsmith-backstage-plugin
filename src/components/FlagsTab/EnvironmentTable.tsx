@@ -11,7 +11,10 @@ import {
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { FlagsmithEnvironment, FlagsmithFeature } from '../../api/FlagsmithClient';
-import { flagsmithColors } from '../../theme/flagsmithTheme';
+import { switchOnStyle } from '../../theme/sharedStyles';
+import { MAX_DETAIL_ENVIRONMENTS } from '../../constants';
+import { isDefined } from '../../utils/flagTypeHelpers';
+import { formatDate } from '../../utils/dateFormatters';
 
 const useStyles = makeStyles(theme => ({
   envTable: {
@@ -27,14 +30,7 @@ const useStyles = makeStyles(theme => ({
       textTransform: 'uppercase',
     },
   },
-  switchOn: {
-    '& .MuiSwitch-switchBase.Mui-checked': {
-      color: flagsmithColors.primary,
-    },
-    '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-      backgroundColor: flagsmithColors.primary,
-    },
-  },
+  switchOn: switchOnStyle,
   envBadge: {
     fontSize: '0.7rem',
     height: 18,
@@ -46,6 +42,17 @@ const useStyles = makeStyles(theme => ({
     fontSize: '0.85rem',
     color: theme.palette.text.primary,
   },
+  envName: {
+    fontWeight: 500,
+  },
+  overridesContainer: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: 4,
+  },
+  hiddenEnvsMessage: {
+    marginTop: theme.spacing(1),
+  },
 }));
 
 interface EnvironmentTableProps {
@@ -53,15 +60,20 @@ interface EnvironmentTableProps {
   environments: FlagsmithEnvironment[];
 }
 
-const MAX_ENVIRONMENTS = 10;
+/**
+ * Format override count with proper pluralization
+ */
+const formatOverrideLabel = (count: number, singular: string, plural: string): string => {
+  return `${count} ${count > 1 ? plural : singular}`;
+};
 
 export const EnvironmentTable = ({
   feature,
   environments,
 }: EnvironmentTableProps) => {
   const classes = useStyles();
-  const displayedEnvironments = environments.slice(0, MAX_ENVIRONMENTS);
-  const hiddenCount = environments.length - MAX_ENVIRONMENTS;
+  const displayedEnvironments = environments.slice(0, MAX_DETAIL_ENVIRONMENTS);
+  const hiddenCount = environments.length - MAX_DETAIL_ENVIRONMENTS;
 
   // Check if any environment uses v2 versioning
   const hasVersioning = displayedEnvironments.some(env => env.use_v2_feature_versioning);
@@ -86,11 +98,12 @@ export const EnvironmentTable = ({
             const segmentCount = feature.num_segment_overrides ?? 0;
             const identityCount = feature.num_identity_overrides ?? 0;
             const value = feature.type === 'CONFIG' ? feature.initial_value : null;
+            const hasOverrides = segmentCount > 0 || identityCount > 0;
 
             return (
               <TableRow key={env.id}>
                 <TableCell>
-                  <Typography variant="body2" style={{ fontWeight: 500 }}>
+                  <Typography variant="body2" className={classes.envName}>
                     {env.name}
                   </Typography>
                 </TableCell>
@@ -104,14 +117,14 @@ export const EnvironmentTable = ({
                 </TableCell>
                 <TableCell>
                   <Typography variant="body2" className={classes.valueCell}>
-                    {value !== null && value !== undefined ? `"${value}"` : '-'}
+                    {isDefined(value) ? `"${value}"` : '-'}
                   </Typography>
                 </TableCell>
                 <TableCell>
-                  <Box display="flex" flexWrap="wrap" style={{ gap: 4 }}>
+                  <Box className={classes.overridesContainer}>
                     {segmentCount > 0 && (
                       <Chip
-                        label={`${segmentCount} segment${segmentCount > 1 ? 's' : ''}`}
+                        label={formatOverrideLabel(segmentCount, 'segment', 'segments')}
                         size="small"
                         variant="outlined"
                         className={classes.envBadge}
@@ -119,13 +132,13 @@ export const EnvironmentTable = ({
                     )}
                     {identityCount > 0 && (
                       <Chip
-                        label={`${identityCount} identit${identityCount > 1 ? 'ies' : 'y'}`}
+                        label={formatOverrideLabel(identityCount, 'identity', 'identities')}
                         size="small"
                         variant="outlined"
                         className={classes.envBadge}
                       />
                     )}
-                    {segmentCount === 0 && identityCount === 0 && (
+                    {!hasOverrides && (
                       <Typography variant="body2" color="textSecondary">
                         -
                       </Typography>
@@ -141,7 +154,7 @@ export const EnvironmentTable = ({
                 )}
                 <TableCell>
                   <Typography variant="body2" color="textSecondary">
-                    {new Date(feature.created_date).toLocaleDateString()}
+                    {formatDate(feature.created_date)}
                   </Typography>
                 </TableCell>
               </TableRow>
@@ -150,7 +163,7 @@ export const EnvironmentTable = ({
         </TableBody>
       </Table>
       {hiddenCount > 0 && (
-        <Box mt={1}>
+        <Box className={classes.hiddenEnvsMessage}>
           <Typography variant="body2" color="textSecondary">
             +{hiddenCount} more environment{hiddenCount > 1 ? 's' : ''} not shown
           </Typography>

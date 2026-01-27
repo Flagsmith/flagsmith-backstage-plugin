@@ -5,14 +5,12 @@ import ScheduleIcon from '@material-ui/icons/Schedule';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import { FlagsmithFeature, FlagsmithFeatureVersion } from '../../api/FlagsmithClient';
 import { flagsmithColors } from '../../theme/flagsmithTheme';
+import { detailCardStyle } from '../../theme/sharedStyles';
+import { getFlagType, getValueType, isDefined } from '../../utils/flagTypeHelpers';
+import { formatDate, formatDateTime } from '../../utils/dateFormatters';
 
 const useStyles = makeStyles(theme => ({
-  detailCard: {
-    padding: theme.spacing(1.5),
-    marginBottom: theme.spacing(1),
-    border: `1px solid ${theme.palette.divider}`,
-    borderRadius: theme.shape.borderRadius,
-  },
+  detailCard: detailCardStyle(theme),
   badgeChip: {
     marginRight: theme.spacing(0.5),
     marginTop: theme.spacing(0.5),
@@ -42,6 +40,11 @@ const useStyles = makeStyles(theme => ({
     fontSize: '1.2rem',
     color: theme.palette.warning.main,
   },
+  tagsContainer: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: 4,
+  },
 }));
 
 type LiveVersionInfo = FlagsmithFeature['live_version'];
@@ -53,6 +56,17 @@ interface FeatureDetailsGridProps {
   scheduledVersion?: FlagsmithFeatureVersion | null;
 }
 
+/**
+ * Get display name for the feature creator
+ */
+const getCreatorDisplayName = (feature: FlagsmithFeature): string => {
+  if (!feature.created_by) return 'Unknown';
+  const { email, first_name, last_name } = feature.created_by;
+  if (email) return email;
+  const fullName = `${first_name || ''} ${last_name || ''}`.trim();
+  return fullName || 'Unknown';
+};
+
 export const FeatureDetailsGrid = ({
   feature,
   liveVersion,
@@ -61,32 +75,8 @@ export const FeatureDetailsGrid = ({
 }: FeatureDetailsGridProps) => {
   const classes = useStyles();
 
-  // Check if feature is multivariate
-  const isMultivariate = feature.multivariate_options && feature.multivariate_options.length > 0;
-
-  // Determine flag type display
-  const getFlagType = () => {
-    if (isMultivariate) return 'Multivariate';
-    if (feature.type === 'CONFIG') return 'Remote Config';
-    return 'Standard';
-  };
-
-  // Determine value type based on initial_value or multivariate options
-  const getValueType = () => {
-    if (isMultivariate && feature.multivariate_options && feature.multivariate_options.length > 0) {
-      const firstOption = feature.multivariate_options[0];
-      if (firstOption.string_value !== null && firstOption.string_value !== undefined) return 'String';
-      if (firstOption.integer_value !== null && firstOption.integer_value !== undefined) return 'Number';
-      if (firstOption.boolean_value !== null && firstOption.boolean_value !== undefined) return 'Boolean';
-    }
-    if (feature.type === 'CONFIG' && feature.initial_value !== null && feature.initial_value !== undefined) {
-      const value = feature.initial_value;
-      if (value === 'true' || value === 'false') return 'Boolean';
-      if (!isNaN(Number(value))) return 'Number';
-      return 'String';
-    }
-    return 'Boolean'; // Flag type defaults to boolean
-  };
+  const flagType = getFlagType(feature);
+  const valueType = getValueType(feature);
 
   return (
     <>
@@ -120,12 +110,10 @@ export const FeatureDetailsGrid = ({
           <Box className={classes.scheduledCard}>
             <Box className={classes.scheduledHeader}>
               <ScheduleIcon className={classes.scheduleIcon} />
-              <Typography variant="subtitle2">
-                Scheduled Change
-              </Typography>
+              <Typography variant="subtitle2">Scheduled Change</Typography>
             </Box>
             <Typography variant="body2">
-              Scheduled for: {new Date(scheduledVersion.live_from).toLocaleString()}
+              Scheduled for: {formatDateTime(scheduledVersion.live_from)}
             </Typography>
             {scheduledVersion.published_by && (
               <Typography variant="body2" color="textSecondary">
@@ -148,14 +136,14 @@ export const FeatureDetailsGrid = ({
             </Typography>
             {liveVersion.live_from && (
               <Typography variant="body2">
-                Live since: {new Date(liveVersion.live_from).toLocaleDateString()}
+                Live since: {formatDate(liveVersion.live_from)}
               </Typography>
             )}
           </Box>
         </Grid>
       )}
 
-      {/* Details card */}
+      {/* Targeting card */}
       <Grid item xs={12} md={4}>
         <Box className={classes.detailCard}>
           <Typography variant="subtitle2" gutterBottom>
@@ -164,31 +152,27 @@ export const FeatureDetailsGrid = ({
           <Typography variant="body2">
             Segment overrides: {segmentOverrides}
           </Typography>
-          {feature.num_identity_overrides !== null &&
-            feature.num_identity_overrides !== undefined && (
-              <Typography variant="body2">
-                Identity overrides: {feature.num_identity_overrides}
-              </Typography>
-            )}
+          {isDefined(feature.num_identity_overrides) && (
+            <Typography variant="body2">
+              Identity overrides: {feature.num_identity_overrides}
+            </Typography>
+          )}
         </Box>
       </Grid>
 
+      {/* Details card */}
       <Grid item xs={12} md={4}>
         <Box className={classes.detailCard}>
           <Typography variant="subtitle2" gutterBottom>
             Details
           </Typography>
           <Typography variant="body2">ID: {feature.id}</Typography>
-          <Typography variant="body2">
-            Flag Type: {getFlagType()}
-          </Typography>
-          <Typography variant="body2">
-            Value Type: {getValueType()}
-          </Typography>
+          <Typography variant="body2">Flag Type: {flagType}</Typography>
+          <Typography variant="body2">Value Type: {valueType}</Typography>
         </Box>
       </Grid>
 
-      {/* Owners card */}
+      {/* Ownership card */}
       <Grid item xs={12} md={4}>
         <Box className={classes.detailCard}>
           <Typography variant="subtitle2" gutterBottom>
@@ -196,7 +180,7 @@ export const FeatureDetailsGrid = ({
           </Typography>
           {feature.created_by && (
             <Typography variant="body2">
-              Creator: {feature.created_by.email || `${feature.created_by.first_name || ''} ${feature.created_by.last_name || ''}`.trim() || 'Unknown'}
+              Creator: {getCreatorDisplayName(feature)}
             </Typography>
           )}
           {feature.owners && feature.owners.length > 0 ? (
@@ -222,14 +206,9 @@ export const FeatureDetailsGrid = ({
           <Typography variant="subtitle2" gutterBottom>
             Tags
           </Typography>
-          <Box display="flex" flexWrap="wrap" style={{ gap: 4 }}>
+          <Box className={classes.tagsContainer}>
             {feature.tags.map((tag, index) => (
-              <Chip
-                key={index}
-                label={tag}
-                size="small"
-                variant="outlined"
-              />
+              <Chip key={index} label={tag} size="small" variant="outlined" />
             ))}
           </Box>
         </Grid>
