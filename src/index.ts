@@ -64,3 +64,8 @@ const flagsmithPlugin = createFrontendPlugin({
 });
 
 export default flagsmithPlugin;
+
+// Legacy frontend system exports
+export { FlagsTab } from './components/FlagsTab';
+export { FlagsmithOverviewCard } from './components/FlagsmithOverviewCard';
+export { FlagsmithUsageCard } from './components/FlagsmithUsageCard';
