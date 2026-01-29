@@ -5,3 +5,4 @@ export { MiniPagination } from './MiniPagination';
 export { LoadingState } from './LoadingState';
 export { EmptyState } from './EmptyState';
 export { ErrorState } from './ErrorState';
+export { ChartTooltip, ChartTooltipText } from './ChartTooltip';

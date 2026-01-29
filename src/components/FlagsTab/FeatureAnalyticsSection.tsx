@@ -23,6 +23,7 @@ import {
 } from '../../constants';
 import { getErrorMessage } from '../../utils/flagTypeHelpers';
 import { formatShortDate } from '../../utils/dateFormatters';
+import { ChartTooltip, ChartTooltipText } from '../shared';
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -56,6 +57,47 @@ interface ChartDataPoint {
   date: string;
   [envName: string]: number | string;
 }
+
+/**
+ * Custom tooltip component for analytics chart
+ */
+const AnalyticsTooltip = ({ active, payload, label }: any) => {
+  return (
+    <ChartTooltip active={active} payload={payload} label={label}>
+      {(data, tooltipLabel) => (
+        <>
+          <ChartTooltipText variant="subtitle2" fontWeight={600}>
+            {tooltipLabel}
+          </ChartTooltipText>
+          <Box mt={1}>
+            {data.map((entry: any, index: number) => (
+              <Box
+                key={`item-${index}`}
+                display="flex"
+                alignItems="center"
+                mt={0.25}
+                style={{ gap: '4px' }}
+              >
+                <span
+                  style={{
+                    display: 'inline-block',
+                    width: '8px',
+                    height: '8px',
+                    backgroundColor: entry.color,
+                    borderRadius: '50%',
+                  }}
+                />
+                <ChartTooltipText>
+                  {entry.name}: {entry.value}
+                </ChartTooltipText>
+              </Box>
+            ))}
+          </Box>
+        </>
+      )}
+    </ChartTooltip>
+  );
+};
 
 interface FeatureAnalyticsSectionProps {
   client: FlagsmithClient;
@@ -107,9 +149,11 @@ export const FeatureAnalyticsSection = ({
   const [error, setError] = useState<string | null>(null);
 
   // Memoize environments to prevent re-renders from reference changes
+  const envIds = environments.map(e => e.id).join(',');
   const memoizedEnvironments = useMemo(
     () => environments.map(e => ({ id: e.id, name: e.name })),
-    [environments.map(e => e.id).join(',')]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [envIds]
   );
 
   useEffect(() => {
@@ -190,7 +234,7 @@ export const FeatureAnalyticsSection = ({
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="date" fontSize={12} />
             <YAxis fontSize={12} />
-            <Tooltip />
+            <Tooltip content={<AnalyticsTooltip />} />
             <Legend />
             {envNames.map((envName, index) => (
               <Line
