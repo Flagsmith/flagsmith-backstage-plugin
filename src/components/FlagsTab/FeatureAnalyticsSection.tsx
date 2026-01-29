@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Box, CircularProgress, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import {
@@ -106,9 +106,15 @@ export const FeatureAnalyticsSection = ({
   const [envNames, setEnvNames] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
 
+  // Memoize environments to prevent re-renders from reference changes
+  const memoizedEnvironments = useMemo(
+    () => environments.map(e => ({ id: e.id, name: e.name })),
+    [environments.map(e => e.id).join(',')]
+  );
+
   useEffect(() => {
     const fetchUsageData = async () => {
-      if (!orgId || !projectId || environments.length === 0) {
+      if (!orgId || !projectId || memoizedEnvironments.length === 0) {
         setLoading(false);
         return;
       }
@@ -117,9 +123,7 @@ export const FeatureAnalyticsSection = ({
         setLoading(true);
         setError(null);
 
-        const displayedEnvs = environments
-          .slice(0, MAX_TABLE_ENVIRONMENTS)
-          .map(e => ({ id: e.id, name: e.name }));
+        const displayedEnvs = memoizedEnvironments.slice(0, MAX_TABLE_ENVIRONMENTS);
 
         const usageByEnv = await client.getUsageDataByEnvironments(
           orgId,
@@ -138,7 +142,7 @@ export const FeatureAnalyticsSection = ({
     };
 
     fetchUsageData();
-  }, [client, orgId, projectId, environments]);
+  }, [client, orgId, projectId, memoizedEnvironments]);
 
   if (loading) {
     return (

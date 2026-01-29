@@ -42,8 +42,11 @@ const useStyles = makeStyles(theme => ({
     gap: theme.spacing(0.5),
   },
   expandedContent: {
-    backgroundColor: theme.palette.background.default,
-    padding: theme.spacing(2),
+    // No backgroundColor - inherit from parent table
+  },
+  expandedCell: {
+    paddingBottom: 0,
+    paddingTop: 0,
   },
   clickableRow: {
     cursor: 'pointer',
@@ -203,9 +206,9 @@ export const ExpandableRow = memo(
         </TableRow>
 
         <TableRow>
-          <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={totalColumns}>
+          <TableCell className={classes.expandedCell} colSpan={totalColumns}>
             <Collapse in={open} timeout="auto" unmountOnExit>
-              <Box className={classes.expandedContent}>
+              <Box className={classes.expandedContent} p={2}>
                 {loadingDetails && (
                   <Box display="flex" alignItems="center" p={2}>
                     <CircularProgress size={20} />

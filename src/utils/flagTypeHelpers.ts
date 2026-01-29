@@ -1,4 +1,5 @@
 import { FlagsmithFeature } from '../api/FlagsmithClient';
+import { FEATURE_TYPES } from '../constants';
 
 export type FlagType = 'Multivariate' | 'Remote Config' | 'Standard';
 export type ValueType = 'Boolean' | 'String' | 'Number';
@@ -30,7 +31,7 @@ export const isMultivariateFeature = (feature: FlagsmithFeature): boolean => {
  */
 export const getFlagType = (feature: FlagsmithFeature): FlagType => {
   if (isMultivariateFeature(feature)) return 'Multivariate';
-  if (feature.type === 'CONFIG') return 'Remote Config';
+  if (feature.type === FEATURE_TYPES.CONFIG) return 'Remote Config';
   return 'Standard';
 };
 
@@ -47,7 +48,7 @@ export const getValueType = (feature: FlagsmithFeature): ValueType => {
   }
 
   // Check CONFIG type with initial_value
-  if (feature.type === 'CONFIG' && isDefined(feature.initial_value)) {
+  if (feature.type === FEATURE_TYPES.CONFIG && isDefined(feature.initial_value)) {
     const value = feature.initial_value;
     if (value === 'true' || value === 'false') return 'Boolean';
     if (!isNaN(Number(value))) return 'Number';

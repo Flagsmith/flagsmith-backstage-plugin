@@ -297,13 +297,13 @@ export class FlagsmithClient {
     const versions = await this.getFeatureVersions(environmentId, featureId);
     const liveVersion = versions.find(v => v.is_live) || null;
 
-    // Find scheduled version (future live_from date, not yet live)
+    // Find next scheduled version (future live_from date, not yet live)
+    // If multiple versions are scheduled, pick the earliest one
     const now = new Date();
-    const scheduledVersion = versions.find(v =>
-      !v.is_live &&
-      v.live_from &&
-      new Date(v.live_from) > now
-    ) || null;
+    const scheduledVersions = versions
+      .filter(v => !v.is_live && v.live_from && new Date(v.live_from) > now)
+      .sort((a, b) => new Date(a.live_from!).getTime() - new Date(b.live_from!).getTime());
+    const scheduledVersion = scheduledVersions[0] || null;
 
     let featureState: FlagsmithFeatureState[] | null = null;
     let segmentOverrides = 0;

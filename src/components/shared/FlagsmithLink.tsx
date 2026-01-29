@@ -3,7 +3,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import LaunchIcon from '@material-ui/icons/Launch';
 import { flagsmithColors } from '../../theme/flagsmithTheme';
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles(theme => ({
   link: {
     display: 'inline-flex',
     alignItems: 'center',
@@ -22,6 +22,11 @@ const useStyles = makeStyles(() => ({
   iconButton: {
     padding: 4,
     color: flagsmithColors.primary,
+  },
+  tooltip: {
+    backgroundColor: theme.palette.grey[700],
+    color: theme.palette.common.white,
+    fontSize: '0.75rem',
   },
 }));
 
@@ -48,7 +53,7 @@ export const FlagsmithLink = ({
 
   if (iconOnly) {
     return (
-      <Tooltip title={tooltip}>
+      <Tooltip title={tooltip} classes={{ tooltip: classes.tooltip }}>
         <IconButton
           className={classes.iconButton}
           href={href}
@@ -65,7 +70,7 @@ export const FlagsmithLink = ({
   }
 
   return (
-    <Tooltip title={tooltip}>
+    <Tooltip title={tooltip} classes={{ tooltip: classes.tooltip }}>
       <Link
         className={classes.link}
         href={href}

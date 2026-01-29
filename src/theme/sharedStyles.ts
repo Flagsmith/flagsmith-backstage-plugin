@@ -1,4 +1,4 @@
-import { Theme, makeStyles } from '@material-ui/core/styles';
+import { Theme } from '@material-ui/core/styles';
 import { flagsmithColors } from './flagsmithTheme';
 
 /**
@@ -31,19 +31,3 @@ export const detailCardStyle = (theme: Theme) => ({
   border: `1px solid ${theme.palette.divider}`,
   borderRadius: theme.shape.borderRadius,
 });
-
-/**
- * Hook for common component styles
- */
-export const useCommonStyles = makeStyles(theme => ({
-  switchOn: switchOnStyle,
-  smallChip: smallChipStyle(theme),
-  detailCard: detailCardStyle(theme),
-  monospaceText: {
-    fontFamily: 'monospace',
-    fontSize: '0.85rem',
-  },
-  clickableRow: {
-    cursor: 'pointer',
-  },
-}));

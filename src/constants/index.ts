@@ -2,6 +2,12 @@
  * Constants for FlagsTab and related components
  */
 
+/** Feature types from Flagsmith API */
+export const FEATURE_TYPES = {
+  CONFIG: 'CONFIG',
+  FLAG: 'FLAG',
+} as const;
+
 /** Maximum number of tags to display inline before showing "+N more" */
 export const MAX_DISPLAY_TAGS = 3;
 

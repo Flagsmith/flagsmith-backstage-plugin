@@ -169,7 +169,7 @@ export const FlagsTab = () => {
         onPageChange={handleChangePage}
         rowsPerPage={rowsPerPage}
         onRowsPerPageChange={handleChangeRowsPerPage}
-        rowsPerPageOptions={[...PAGINATION_OPTIONS]}
+        rowsPerPageOptions={[...PAGINATION_OPTIONS]} // Spread needed: readonly tuple -> mutable array
       />
     </Box>
   );
