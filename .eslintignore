@@ -1,0 +1,4 @@
+# Exclude demo build files from linting
+demo/
+dist-demo/
+vite.config.demo.ts
