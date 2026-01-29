@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { Box, CircularProgress, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import {
@@ -148,17 +148,9 @@ export const FeatureAnalyticsSection = ({
   const [envNames, setEnvNames] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  // Memoize environments to prevent re-renders from reference changes
-  const envIds = environments.map(e => e.id).join(',');
-  const memoizedEnvironments = useMemo(
-    () => environments.map(e => ({ id: e.id, name: e.name })),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [envIds]
-  );
-
   useEffect(() => {
     const fetchUsageData = async () => {
-      if (!orgId || !projectId || memoizedEnvironments.length === 0) {
+      if (!orgId || !projectId || environments.length === 0) {
         setLoading(false);
         return;
       }
@@ -167,7 +159,7 @@ export const FeatureAnalyticsSection = ({
         setLoading(true);
         setError(null);
 
-        const displayedEnvs = memoizedEnvironments.slice(0, MAX_TABLE_ENVIRONMENTS);
+        const displayedEnvs = environments.slice(0, MAX_TABLE_ENVIRONMENTS);
 
         const usageByEnv = await client.getUsageDataByEnvironments(
           orgId,
@@ -186,7 +178,7 @@ export const FeatureAnalyticsSection = ({
     };
 
     fetchUsageData();
-  }, [client, orgId, projectId, memoizedEnvironments]);
+  }, [client, orgId, projectId, environments]);
 
   if (loading) {
     return (
