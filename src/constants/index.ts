@@ -60,5 +60,5 @@ export const getEnvColor = (envName: string, index: number): string => {
   for (const [key, color] of Object.entries(ENV_COLORS)) {
     if (lowerName.includes(key)) return color;
   }
-  return DEFAULT_ENV_COLORS[index % DEFAULT_ENV_COLORS.length];
+  return DEFAULT_ENV_COLORS[index % DEFAULT_ENV_COLORS.length] || '#2196f3';
 };

@@ -16,6 +16,42 @@ interface UsageChartProps {
   data: FlagsmithUsageData[];
 }
 
+/**
+ * Custom tooltip for usage chart displaying flags, identities, traits, and environment document
+ */
+const UsageChartTooltip = ({ active, payload }: any) => (
+  <ChartTooltip active={active} payload={payload}>
+    {(data) => {
+      const usageData = data[0].payload as FlagsmithUsageData;
+      return (
+        <>
+          <ChartTooltipText variant="subtitle2" fontWeight={600}>
+            {new Date(usageData.day).toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric',
+            })}
+          </ChartTooltipText>
+          <Box mt={1}>
+            <ChartTooltipText>
+              <strong>Flags:</strong> {usageData.flags ?? 0}
+            </ChartTooltipText>
+            <ChartTooltipText>
+              <strong>Identities:</strong> {usageData.identities}
+            </ChartTooltipText>
+            <ChartTooltipText>
+              <strong>Traits:</strong> {usageData.traits}
+            </ChartTooltipText>
+            <ChartTooltipText>
+              <strong>Environment Document:</strong> {usageData.environment_document}
+            </ChartTooltipText>
+          </Box>
+        </>
+      );
+    }}
+  </ChartTooltip>
+);
+
 export const UsageChart = ({ data }: UsageChartProps) => {
   if (data.length === 0) {
     return (
@@ -45,40 +81,7 @@ export const UsageChart = ({ data }: UsageChartProps) => {
           height={80}
         />
         <YAxis />
-        <Tooltip
-          content={
-            <ChartTooltip>
-              {(payload) => {
-                const usageData = payload[0].payload as FlagsmithUsageData;
-                return (
-                  <>
-                    <ChartTooltipText variant="subtitle2" fontWeight={600}>
-                      {new Date(usageData.day).toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric',
-                      })}
-                    </ChartTooltipText>
-                    <Box mt={1}>
-                      <ChartTooltipText>
-                        <strong>Flags:</strong> {usageData.flags ?? 0}
-                      </ChartTooltipText>
-                      <ChartTooltipText>
-                        <strong>Identities:</strong> {usageData.identities}
-                      </ChartTooltipText>
-                      <ChartTooltipText>
-                        <strong>Traits:</strong> {usageData.traits}
-                      </ChartTooltipText>
-                      <ChartTooltipText>
-                        <strong>Environment Document:</strong> {usageData.environment_document}
-                      </ChartTooltipText>
-                    </Box>
-                  </>
-                );
-              }}
-            </ChartTooltip>
-          }
-        />
+        <Tooltip content={<UsageChartTooltip />} />
         <Bar
           dataKey="flags"
           fill={flagsmithColors.primary}

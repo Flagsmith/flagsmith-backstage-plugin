@@ -41,7 +41,7 @@ interface ChartTooltipProps {
 export const ChartTooltip = ({ active, payload, label, children }: ChartTooltipProps) => {
   const classes = useStyles();
 
-  if (!active || !payload || !payload.length) {
+  if (!active || !payload?.length) {
     return null;
   }
 
