@@ -60,5 +60,14 @@ export function useFlagsmithProject(
     fetchData();
   }, [projectId, client]);
 
-  return { project, environments, features, loading, error, client };
+  // Memoize environments to prevent unnecessary re-renders in child components
+  // Only create new reference when environment IDs actually change
+  const envIds = environments.map(e => e.id).join(',');
+  const memoizedEnvironments = useMemo(
+    () => environments,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [envIds],
+  );
+
+  return { project, environments: memoizedEnvironments, features, loading, error, client };
 }
