@@ -1,8 +1,8 @@
-import { Typography, Box } from '@material-ui/core';
+import { Box } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { InfoCard } from '@backstage/core-components';
 import { useEntity } from '@backstage/plugin-catalog-react';
-import { FlagsmithLink, LoadingState } from '../shared';
+import { FlagsmithLink, LoadingState, ErrorState } from '../shared';
 import { FLAGSMITH_DASHBOARD_URL } from '../../theme/flagsmithTheme';
 import { useFlagsmithUsage } from '../../hooks';
 import { UsageChart } from './UsageChart';
@@ -40,15 +40,10 @@ export const FlagsmithUsageCard = () => {
   if (error) {
     return (
       <InfoCard title="Flags Usage Data (30 Days)">
-        <Box p={2}>
-          <Typography color="error">Error: {error}</Typography>
-          {!orgId && (
-            <Typography variant="body2" style={{ marginTop: 8 }}>
-              Add a <code>flagsmith.com/organization-id</code> annotation to this
-              entity.
-            </Typography>
-          )}
-        </Box>
+        <ErrorState
+          message={error}
+          hint={!orgId ? 'Add a flagsmith.com/organization-id annotation to this entity.' : undefined}
+        />
       </InfoCard>
     );
   }

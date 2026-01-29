@@ -18,6 +18,7 @@ export interface FlagsmithEnvironment {
   name: string;
   api_key: string;
   project: number;
+  use_v2_feature_versioning?: boolean;
 }
 
 export interface FlagsmithFeature {
@@ -45,12 +46,30 @@ export interface FlagsmithFeature {
     name: string;
     email: string;
   }>;
+  group_owners?: Array<{
+    id: number;
+    name: string;
+  }>;
+  created_by?: {
+    id: number;
+    email: string;
+    first_name?: string;
+    last_name?: string;
+  } | null;
   tags?: Array<string>;
   is_server_key_only?: boolean;
   type?: string;
   default_enabled?: boolean;
   is_archived?: boolean;
   initial_value?: string | null;
+  multivariate_options?: Array<{
+    id: number;
+    type: string;
+    integer_value?: number | null;
+    string_value?: string | null;
+    boolean_value?: boolean | null;
+    default_percentage_allocation: number;
+  }>;
 }
 
 export interface FlagsmithFeatureVersion {
@@ -85,6 +104,7 @@ export interface FlagsmithFeatureDetails {
   liveVersion: FlagsmithFeatureVersion | null;
   featureState: FlagsmithFeatureState[] | null;
   segmentOverrides: number;
+  scheduledVersion: FlagsmithFeatureVersion | null;
 }
 
 export interface FlagsmithUsageData {
@@ -183,11 +203,15 @@ export class FlagsmithClient {
   async getUsageData(
     orgId: number,
     projectId?: number,
+    environmentId?: number,
   ): Promise<FlagsmithUsageData[]> {
     const baseUrl = await this.getBaseUrl();
     const url = new URL(`${baseUrl}/organisations/${orgId}/usage-data/`);
     if (projectId) {
       url.searchParams.set('project_id', projectId.toString());
+    }
+    if (environmentId) {
+      url.searchParams.set('environment_id', environmentId.toString());
     }
 
     const response = await this.fetchApi.fetch(url.toString());
@@ -197,6 +221,35 @@ export class FlagsmithClient {
     }
 
     return await response.json();
+  }
+
+  /**
+   * Fetch usage data for multiple environments in parallel
+   */
+  async getUsageDataByEnvironments(
+    orgId: number,
+    projectId: number,
+    environments: Pick<FlagsmithEnvironment, 'id' | 'name'>[],
+  ): Promise<Map<string, FlagsmithUsageData[]>> {
+    const results = new Map<string, FlagsmithUsageData[]>();
+
+    // Fetch usage data for each environment in parallel
+    const promises = environments.map(async env => {
+      try {
+        const data = await this.getUsageData(orgId, projectId, env.id);
+        return { envName: env.name, data };
+      } catch {
+        // If environment-level filtering isn't supported, return empty
+        return { envName: env.name, data: [] };
+      }
+    });
+
+    const responses = await Promise.all(promises);
+    responses.forEach(({ envName, data }) => {
+      results.set(envName, data);
+    });
+
+    return results;
   }
 
   // Lazy loading methods for feature details
@@ -244,6 +297,14 @@ export class FlagsmithClient {
     const versions = await this.getFeatureVersions(environmentId, featureId);
     const liveVersion = versions.find(v => v.is_live) || null;
 
+    // Find next scheduled version (future live_from date, not yet live)
+    // If multiple versions are scheduled, pick the earliest one
+    const now = new Date();
+    const scheduledVersions = versions
+      .filter(v => !v.is_live && v.live_from && new Date(v.live_from) > now)
+      .sort((a, b) => new Date(a.live_from!).getTime() - new Date(b.live_from!).getTime());
+    const scheduledVersion = scheduledVersions[0] || null;
+
     let featureState: FlagsmithFeatureState[] | null = null;
     let segmentOverrides = 0;
 
@@ -262,6 +323,7 @@ export class FlagsmithClient {
       liveVersion,
       featureState,
       segmentOverrides,
+      scheduledVersion,
     };
   }
 }

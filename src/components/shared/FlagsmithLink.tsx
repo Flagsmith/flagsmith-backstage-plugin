@@ -3,7 +3,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import LaunchIcon from '@material-ui/icons/Launch';
 import { flagsmithColors } from '../../theme/flagsmithTheme';
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles(theme => ({
   link: {
     display: 'inline-flex',
     alignItems: 'center',
@@ -23,6 +23,11 @@ const useStyles = makeStyles(() => ({
     padding: 4,
     color: flagsmithColors.primary,
   },
+  tooltip: {
+    backgroundColor: theme.palette.grey[700],
+    color: theme.palette.common.white,
+    fontSize: '0.75rem',
+  },
 }));
 
 interface FlagsmithLinkProps {
@@ -30,6 +35,7 @@ interface FlagsmithLinkProps {
   children?: React.ReactNode;
   tooltip?: string;
   iconOnly?: boolean;
+  onClick?: (event: React.MouseEvent) => void;
 }
 
 /**
@@ -41,12 +47,13 @@ export const FlagsmithLink = ({
   children,
   tooltip = 'Open in Flagsmith',
   iconOnly = false,
+  onClick,
 }: FlagsmithLinkProps) => {
   const classes = useStyles();
 
   if (iconOnly) {
     return (
-      <Tooltip title={tooltip}>
+      <Tooltip title={tooltip} classes={{ tooltip: classes.tooltip }}>
         <IconButton
           className={classes.iconButton}
           href={href}
@@ -54,6 +61,7 @@ export const FlagsmithLink = ({
           rel="noopener noreferrer"
           size="small"
           aria-label={tooltip}
+          onClick={onClick}
         >
           <LaunchIcon fontSize="small" aria-hidden="true" />
         </IconButton>
@@ -62,13 +70,14 @@ export const FlagsmithLink = ({
   }
 
   return (
-    <Tooltip title={tooltip}>
+    <Tooltip title={tooltip} classes={{ tooltip: classes.tooltip }}>
       <Link
         className={classes.link}
         href={href}
         target="_blank"
         rel="noopener noreferrer"
         aria-label={`${tooltip} (opens in new tab)`}
+        onClick={onClick}
       >
         {children}
         <LaunchIcon className={classes.icon} aria-hidden="true" />
