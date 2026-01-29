@@ -21,7 +21,7 @@ export const MAX_DETAIL_ENVIRONMENTS = 10;
 export const DESCRIPTION_TRUNCATE_LENGTH = 60;
 
 /** Pagination options for the flags table */
-export const PAGINATION_OPTIONS = [10, 25, 50, 100] as const;
+export const PAGINATION_OPTIONS = [10, 25, 50, 100];
 
 /** Default rows per page */
 export const DEFAULT_ROWS_PER_PAGE = 50;
