@@ -1,41 +1,23 @@
-name: Publish Release
+name: Publish NPM Package
 
 on:
-  release:
-    types: [published]
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version bump type'
-        required: true
-        type: choice
-        options:
-          - patch
-          - minor
-          - major
-
-permissions:
-  contents: write
-  id-token: write
-  pull-requests: write
+  push:
+    tags:
+      - 'v*'
 
 jobs:
-  # Publish on GitHub Release (manual release via UI)
-  publish-on-release:
-    if: github.event_name == 'release'
+  # Build job - no id-token permission (security: isolate build from publish)
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.release.tag_name }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: 'yarn'
-          registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
@@ -52,74 +34,34 @@ jobs:
       - name: Build package
         run: yarn build
 
-      - name: Set version from tag
-        run: |
-          # Extract version from tag (removes 'v' prefix if present)
-          VERSION="${{ github.event.release.tag_name }}"
-          VERSION="${VERSION#v}"
-          npm version "$VERSION" --no-git-tag-version --allow-same-version
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
 
-      - name: Publish to NPM
-        run: npm publish --provenance --access public
-
-  # Production release - manual workflow trigger
-  release:
-    if: github.event_name == 'workflow_dispatch'
+  # Publish job - has id-token permission (isolated from build scripts)
+  publish:
     runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
         with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          name: dist
+          path: dist/
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'yarn'
           registry-url: 'https://registry.npmjs.org'
-
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-
-      - name: Run lint
-        run: yarn lint
-
-      - name: TypeScript check
-        run: yarn tsc
-
-      - name: Run tests
-        run: yarn test --ci
-
-      - name: Build package
-        run: yarn build
-
-      - name: Configure Git
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: Bump version
-        id: version
-        run: |
-          NEW_VERSION=$(npm version ${{ inputs.version }} --no-git-tag-version)
-          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
-
-      - name: Commit version bump
-        run: |
-          git add package.json
-          git commit -m "chore(release): ${{ steps.version.outputs.new_version }}"
-          git tag ${{ steps.version.outputs.new_version }}
 
       - name: Publish to NPM
         run: npm publish --provenance --access public
-
-      - name: Push changes
-        run: git push --follow-tags
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ steps.version.outputs.new_version }}
-          generate_release_notes: true
