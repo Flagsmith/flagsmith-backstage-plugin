@@ -61,8 +61,6 @@ jobs:
 
       - name: Publish to NPM
         run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   # Production release - manual workflow trigger
   release:
@@ -116,8 +114,6 @@ jobs:
 
       - name: Publish to NPM
         run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Push changes
         run: git push --follow-tags
