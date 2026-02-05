@@ -1,8 +1,23 @@
 {
-  "name": "@internal/plugin-flagsmith",
+  "name": "@flagsmith/backstage-plugin",
   "version": "0.1.0",
+  "description": "Backstage plugin for Flagsmith feature flag management",
   "license": "Apache-2.0",
-  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Flagsmith/flagsmith-backstage-plugin.git"
+  },
+  "homepage": "https://flagsmith.github.io/flagsmith-backstage-plugin/",
+  "bugs": {
+    "url": "https://github.com/Flagsmith/flagsmith-backstage-plugin/issues"
+  },
+  "keywords": [
+    "backstage",
+    "backstage-plugin",
+    "flagsmith",
+    "feature-flags",
+    "feature-toggles"
+  ],
   "main": "src/index.ts",
   "types": "src/index.ts",
   "publishConfig": {
@@ -12,7 +27,10 @@
   },
   "backstage": {
     "role": "frontend-plugin",
-    "pluginId": "flagsmith"
+    "pluginId": "flagsmith",
+    "pluginPackages": [
+      "@flagsmith/backstage-plugin"
+    ]
   },
   "sideEffects": false,
   "scripts": {
