@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0](https://github.com/Flagsmith/flagsmith-backstage-plugin/compare/v0.1.0...v0.2.0) (2026-02-05)
+
+
+### Features
+
+* **release:** add NPM publishing workflow ([#7](https://github.com/Flagsmith/flagsmith-backstage-plugin/issues/7)) ([c356cce](https://github.com/Flagsmith/flagsmith-backstage-plugin/commit/c356cce4864138c80911fc9b97498b50e32e0316))
+* **ui:** UI/UX improvements and component refactoring ([#5](https://github.com/Flagsmith/flagsmith-backstage-plugin/issues/5)) ([9568e53](https://github.com/Flagsmith/flagsmith-backstage-plugin/commit/9568e5302a7091bcf83f6c18af68f2a9e358bbb2))
+* **ui:** UX improvements for feature flags ([#9](https://github.com/Flagsmith/flagsmith-backstage-plugin/issues/9)) ([#12](https://github.com/Flagsmith/flagsmith-backstage-plugin/issues/12)) ([0561651](https://github.com/Flagsmith/flagsmith-backstage-plugin/commit/0561651e7595f0355a977fb574dfada11ace74bd))
+
+
+### Tests
+
+* add unit and integration tests for Backstage plugin ([#6](https://github.com/Flagsmith/flagsmith-backstage-plugin/issues/6)) ([ab332c7](https://github.com/Flagsmith/flagsmith-backstage-plugin/commit/ab332c7de0a8f7e71db0a14e698056a4d14574ac))
+
 ## [Unreleased]
 
 ## [0.1.0] - 2025-01-27
