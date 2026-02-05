@@ -1,7 +1,9 @@
 import { FlagsmithClient } from './FlagsmithClient';
+import packageJson from '../../package.json';
 
 describe('FlagsmithClient', () => {
   const baseUrl = 'http://localhost:7007/api/proxy/flagsmith';
+  const expectedHeader = `backstage-plugin/${packageJson.version}`;
   let client: FlagsmithClient;
   let mockFetch: jest.Mock;
 
@@ -15,6 +17,11 @@ describe('FlagsmithClient', () => {
 
   const mockOk = (data: unknown) => ({ ok: true, json: async () => data });
   const mockError = (status: string) => ({ ok: false, statusText: status });
+  const expectedOptions = expect.objectContaining({
+    headers: expect.objectContaining({
+      'Flagsmith-API-Client-User-Agent': expectedHeader,
+    }),
+  });
 
   describe('getOrganizations', () => {
     it('fetches organizations', async () => {
@@ -23,7 +30,7 @@ describe('FlagsmithClient', () => {
 
       const result = await client.getOrganizations();
 
-      expect(mockFetch).toHaveBeenCalledWith(`${baseUrl}/organisations/`);
+      expect(mockFetch).toHaveBeenCalledWith(`${baseUrl}/organisations/`, expectedOptions);
       expect(result).toEqual([org]);
     });
 
@@ -40,7 +47,7 @@ describe('FlagsmithClient', () => {
 
       const result = await client.getProjectsInOrg(1);
 
-      expect(mockFetch).toHaveBeenCalledWith(`${baseUrl}/organisations/1/projects/`);
+      expect(mockFetch).toHaveBeenCalledWith(`${baseUrl}/organisations/1/projects/`, expectedOptions);
       expect(result).toEqual([project]);
     });
   });
@@ -52,7 +59,7 @@ describe('FlagsmithClient', () => {
 
       const result = await client.getProject(123);
 
-      expect(mockFetch).toHaveBeenCalledWith(`${baseUrl}/projects/123/`);
+      expect(mockFetch).toHaveBeenCalledWith(`${baseUrl}/projects/123/`, expectedOptions);
       expect(result).toEqual(project);
     });
   });
@@ -64,7 +71,7 @@ describe('FlagsmithClient', () => {
 
       const result = await client.getProjectFeatures('123');
 
-      expect(mockFetch).toHaveBeenCalledWith(`${baseUrl}/projects/123/features/`);
+      expect(mockFetch).toHaveBeenCalledWith(`${baseUrl}/projects/123/features/`, expectedOptions);
       expect(result).toEqual(features);
     });
   });
@@ -76,7 +83,7 @@ describe('FlagsmithClient', () => {
 
       const result = await client.getProjectEnvironments(123);
 
-      expect(mockFetch).toHaveBeenCalledWith(`${baseUrl}/projects/123/environments/`);
+      expect(mockFetch).toHaveBeenCalledWith(`${baseUrl}/projects/123/environments/`, expectedOptions);
       expect(result).toEqual(envs);
     });
   });
@@ -88,14 +95,14 @@ describe('FlagsmithClient', () => {
 
       const result = await client.getUsageData(1);
 
-      expect(mockFetch).toHaveBeenCalledWith(`${baseUrl}/organisations/1/usage-data/`);
+      expect(mockFetch).toHaveBeenCalledWith(`${baseUrl}/organisations/1/usage-data/`, expectedOptions);
       expect(result).toEqual(usage);
     });
 
     it('includes project_id filter', async () => {
       mockFetch.mockResolvedValue(mockOk([]));
       await client.getUsageData(1, 123);
-      expect(mockFetch).toHaveBeenCalledWith(`${baseUrl}/organisations/1/usage-data/?project_id=123`);
+      expect(mockFetch).toHaveBeenCalledWith(`${baseUrl}/organisations/1/usage-data/?project_id=123`, expectedOptions);
     });
   });
 
@@ -106,7 +113,7 @@ describe('FlagsmithClient', () => {
 
       const result = await client.getFeatureVersions(1, 100);
 
-      expect(mockFetch).toHaveBeenCalledWith(`${baseUrl}/environments/1/features/100/versions/`);
+      expect(mockFetch).toHaveBeenCalledWith(`${baseUrl}/environments/1/features/100/versions/`, expectedOptions);
       expect(result).toEqual(versions);
     });
   });
@@ -118,7 +125,7 @@ describe('FlagsmithClient', () => {
 
       const result = await client.getFeatureStates(1, 100, 'uuid');
 
-      expect(mockFetch).toHaveBeenCalledWith(`${baseUrl}/environments/1/features/100/versions/uuid/featurestates/`);
+      expect(mockFetch).toHaveBeenCalledWith(`${baseUrl}/environments/1/features/100/versions/uuid/featurestates/`, expectedOptions);
       expect(result).toEqual(states);
     });
   });
