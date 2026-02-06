@@ -1,4 +1,7 @@
 import { DiscoveryApi, FetchApi } from '@backstage/core-plugin-api';
+import packageJson from '../../package.json';
+
+const CLIENT_HEADER = `backstage-plugin/${packageJson.version}`;
 
 export interface FlagsmithOrganization {
   id: number;
@@ -131,9 +134,19 @@ export class FlagsmithClient {
     return `${proxyUrl}/flagsmith`;
   }
 
+  private async fetch(url: string, options?: RequestInit): Promise<Response> {
+    return this.fetchApi.fetch(url, {
+      ...options,
+      headers: {
+        ...options?.headers,
+        'Flagsmith-API-Client-User-Agent': CLIENT_HEADER,
+      },
+    });
+  }
+
   async getOrganizations(): Promise<FlagsmithOrganization[]> {
     const baseUrl = await this.getBaseUrl();
-    const response = await this.fetchApi.fetch(`${baseUrl}/organisations/`);
+    const response = await this.fetch(`${baseUrl}/organisations/`);
 
     if (!response.ok) {
       throw new Error(`Failed to fetch organizations: ${response.statusText}`);
@@ -145,7 +158,7 @@ export class FlagsmithClient {
 
   async getProjectsInOrg(orgId: number): Promise<FlagsmithProject[]> {
     const baseUrl = await this.getBaseUrl();
-    const response = await this.fetchApi.fetch(
+    const response = await this.fetch(
       `${baseUrl}/organisations/${orgId}/projects/`,
     );
 
@@ -159,7 +172,7 @@ export class FlagsmithClient {
 
   async getProjectFeatures(projectId: string): Promise<FlagsmithFeature[]> {
     const baseUrl = await this.getBaseUrl();
-    const response = await this.fetchApi.fetch(
+    const response = await this.fetch(
       `${baseUrl}/projects/${projectId}/features/`,
     );
 
@@ -175,7 +188,7 @@ export class FlagsmithClient {
     projectId: number,
   ): Promise<FlagsmithEnvironment[]> {
     const baseUrl = await this.getBaseUrl();
-    const response = await this.fetchApi.fetch(
+    const response = await this.fetch(
       `${baseUrl}/projects/${projectId}/environments/`,
     );
 
@@ -189,7 +202,7 @@ export class FlagsmithClient {
 
   async getProject(projectId: number): Promise<FlagsmithProject> {
     const baseUrl = await this.getBaseUrl();
-    const response = await this.fetchApi.fetch(
+    const response = await this.fetch(
       `${baseUrl}/projects/${projectId}/`,
     );
 
@@ -214,7 +227,7 @@ export class FlagsmithClient {
       url.searchParams.set('environment_id', environmentId.toString());
     }
 
-    const response = await this.fetchApi.fetch(url.toString());
+    const response = await this.fetch(url.toString());
 
     if (!response.ok) {
       throw new Error(`Failed to fetch usage data: ${response.statusText}`);
@@ -258,7 +271,7 @@ export class FlagsmithClient {
     featureId: number,
   ): Promise<FlagsmithFeatureVersion[]> {
     const baseUrl = await this.getBaseUrl();
-    const response = await this.fetchApi.fetch(
+    const response = await this.fetch(
       `${baseUrl}/environments/${environmentId}/features/${featureId}/versions/`,
     );
 
@@ -278,7 +291,7 @@ export class FlagsmithClient {
     versionUuid: string,
   ): Promise<FlagsmithFeatureState[]> {
     const baseUrl = await this.getBaseUrl();
-    const response = await this.fetchApi.fetch(
+    const response = await this.fetch(
       `${baseUrl}/environments/${environmentId}/features/${featureId}/versions/${versionUuid}/featurestates/`,
     );
 
