@@ -4,6 +4,7 @@ import ArchiveIcon from '@material-ui/icons/Archive';
 import ScheduleIcon from '@material-ui/icons/Schedule';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import { FlagsmithFeature, FlagsmithFeatureVersion, FlagsmithTag } from '../../api/FlagsmithClient';
+import { TagChip } from '../shared/TagChip';
 import { flagsmithColors } from '../../theme/flagsmithTheme';
 import { detailCardStyle } from '../../theme/sharedStyles';
 import { getFlagType, getValueType, isDefined } from '../../utils/flagTypeHelpers';
@@ -210,7 +211,7 @@ export const FeatureDetailsGrid = ({
           </Typography>
           <Box className={classes.tagsContainer}>
             {feature.tags.map((tagId, index) => (
-              <Chip key={index} label={tagMap.get(tagId)?.label || tagId} size="small" variant="outlined" />
+              <TagChip key={index} tagId={tagId} tagMap={tagMap} />
             ))}
           </Box>
         </Grid>

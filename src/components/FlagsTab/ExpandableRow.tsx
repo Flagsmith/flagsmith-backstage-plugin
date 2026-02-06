@@ -14,6 +14,7 @@ import {
 import { makeStyles } from '@material-ui/core/styles';
 import KeyboardArrowDown from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
+import { TagChip } from '../shared/TagChip';
 import {
   FlagsmithClient,
   FlagsmithEnvironment,
@@ -168,13 +169,7 @@ export const ExpandableRow = memo(
           <TableCell className={classes.tagsCell}>
             <Box className={classes.tagsContainer}>
               {displayTags.map((tagId, index) => (
-                <Chip
-                  key={index}
-                  label={tagMap.get(tagId)?.label || tagId}
-                  size="small"
-                  variant="outlined"
-                  className={classes.tagChip}
-                />
+                <TagChip key={index} tagId={tagId} tagMap={tagMap} />
               ))}
               {remainingTagsCount > 0 && (
                 <Chip
