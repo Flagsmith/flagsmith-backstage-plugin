@@ -13,6 +13,12 @@ export interface FlagsmithProject {
   created_date: string;
 }
 
+export interface FlagsmithTag {
+  id: number;
+  label: string;
+  color?: string;
+}
+
 export interface FlagsmithEnvironment {
   id: number;
   name: string;
@@ -56,7 +62,7 @@ export interface FlagsmithFeature {
     first_name?: string;
     last_name?: string;
   } | null;
-  tags?: Array<string>;
+  tags?: Array<number>;
   is_server_key_only?: boolean;
   type?: string;
   default_enabled?: boolean;
@@ -198,6 +204,20 @@ export class FlagsmithClient {
     }
 
     return await response.json();
+  }
+
+  async getProjectTags(projectId: number): Promise<FlagsmithTag[]> {
+    const baseUrl = await this.getBaseUrl();
+    const response = await this.fetchApi.fetch(
+      `${baseUrl}/projects/${projectId}/tags/`,
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch project tags: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data.results || data;
   }
 
   async getUsageData(
