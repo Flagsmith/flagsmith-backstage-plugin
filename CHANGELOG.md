@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1](https://github.com/Flagsmith/flagsmith-backstage-plugin/compare/v0.2.0...v0.2.1) (2026-02-06)
+
+
+### Bug Fixes
+
+* **ci:** install dependencies in publish job for prepack script ([#15](https://github.com/Flagsmith/flagsmith-backstage-plugin/issues/15)) ([b03c1bd](https://github.com/Flagsmith/flagsmith-backstage-plugin/commit/b03c1bdefc38f26cf9b2364d98a3ea87754fc0c0))
+* **ci:** use Node.js 24 for OIDC trusted publishing support ([#17](https://github.com/Flagsmith/flagsmith-backstage-plugin/issues/17)) ([5fd108e](https://github.com/Flagsmith/flagsmith-backstage-plugin/commit/5fd108eaf67e46cdf082f8b6a97d8257ee58d7d5))
+
 ## [0.2.0](https://github.com/Flagsmith/flagsmith-backstage-plugin/compare/v0.1.0...v0.2.0) (2026-02-05)
 
 

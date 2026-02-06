@@ -1,6 +1,6 @@
 {
   "name": "@flagsmith/backstage-plugin",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Backstage plugin for Flagsmith feature flag management",
   "license": "Apache-2.0",
   "repository": {
