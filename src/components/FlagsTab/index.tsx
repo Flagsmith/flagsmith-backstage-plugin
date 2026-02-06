@@ -50,7 +50,7 @@ export const FlagsTab = () => {
   const [rowsPerPage, setRowsPerPage] = useState(DEFAULT_ROWS_PER_PAGE);
 
   const projectId = entity.metadata.annotations?.['flagsmith.com/project-id'];
-  const { project, environments, features, loading, error, client } =
+  const { project, environments, features, tagMap, loading, error, client } =
     useFlagsmithProject(projectId);
 
   const filteredFeatures = useMemo(() => {
@@ -153,6 +153,7 @@ export const FlagsTab = () => {
                   key={feature.id}
                   feature={feature}
                   environments={environments}
+                  tagMap={tagMap}
                   client={client}
                   projectId={projectId!}
                   orgId={project?.organisation || 0}

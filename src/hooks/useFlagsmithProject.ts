@@ -5,12 +5,14 @@ import {
   FlagsmithProject,
   FlagsmithEnvironment,
   FlagsmithFeature,
+  FlagsmithTag,
 } from '../api/FlagsmithClient';
 
 export interface UseFlagsmithProjectResult {
   project: FlagsmithProject | null;
   environments: FlagsmithEnvironment[];
   features: FlagsmithFeature[];
+  tagMap: Map<number, FlagsmithTag>;
   loading: boolean;
   error: string | null;
   client: FlagsmithClient;
@@ -30,6 +32,7 @@ export function useFlagsmithProject(
   const [project, setProject] = useState<FlagsmithProject | null>(null);
   const [environments, setEnvironments] = useState<FlagsmithEnvironment[]>([]);
   const [features, setFeatures] = useState<FlagsmithFeature[]>([]);
+  const [tags, setTags] = useState<FlagsmithTag[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -50,6 +53,9 @@ export function useFlagsmithProject(
 
         const projectFeatures = await client.getProjectFeatures(projectId);
         setFeatures(projectFeatures || []);
+
+        const projectTags = await client.getProjectTags(parseInt(projectId, 10));
+        setTags(projectTags || []);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Unknown error');
       } finally {
@@ -69,5 +75,12 @@ export function useFlagsmithProject(
     [envIds],
   );
 
-  return { project, environments: memoizedEnvironments, features, loading, error, client };
+  // Create a map of tag ID to tag object for efficient lookup
+  const tagMap = useMemo(() => {
+    const map = new Map<number, FlagsmithTag>();
+    tags.forEach(tag => map.set(tag.id, tag));
+    return map;
+  }, [tags]);
+
+  return { project, environments: memoizedEnvironments, features, tagMap, loading, error, client };
 }
