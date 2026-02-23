@@ -54,7 +54,7 @@ export function useFlagsmithProject(
         const projectFeatures = await client.getProjectFeatures(projectId);
         setFeatures(projectFeatures || []);
 
-        const projectTags = await client.getProjectTags(parseInt(projectId, 10));
+        const projectTags = await client.getProjectTags(projectId);
         setTags(projectTags || []);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Unknown error');

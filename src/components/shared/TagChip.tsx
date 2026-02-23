@@ -18,11 +18,16 @@ interface TagChipProps {
 export const TagChip = ({ tagId, tagMap }: TagChipProps) => {
   const classes = useStyles();
   const tag = tagMap.get(tagId);
-  const tagStyle = getTagChipStyle(tag?.color);
+
+  if (!tag) {
+    return null;
+  }
+
+  const tagStyle = getTagChipStyle(tag.color);
 
   return (
     <Chip
-      label={tag?.label || tagId}
+      label={tag.label}
       size="small"
       variant="outlined"
       className={classes.root}

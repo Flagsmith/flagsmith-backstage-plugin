@@ -206,7 +206,7 @@ export class FlagsmithClient {
     return await response.json();
   }
 
-  async getProjectTags(projectId: number): Promise<FlagsmithTag[]> {
+  async getProjectTags(projectId: string): Promise<FlagsmithTag[]> {
     const baseUrl = await this.getBaseUrl();
     const response = await this.fetchApi.fetch(
       `${baseUrl}/projects/${projectId}/tags/`,
