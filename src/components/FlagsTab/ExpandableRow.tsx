@@ -14,7 +14,6 @@ import {
 import { makeStyles } from '@material-ui/core/styles';
 import KeyboardArrowDown from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
-import { TagChip } from '../shared/TagChip';
 import {
   FlagsmithClient,
   FlagsmithEnvironment,
@@ -22,7 +21,7 @@ import {
   FlagsmithFeatureDetails,
   FlagsmithTag,
 } from '../../api/FlagsmithClient';
-import { FlagsmithLink } from '../shared';
+import { FlagsmithLink, TagChip } from '../shared';
 import { buildFlagUrl } from '../../theme/flagsmithTheme';
 import { switchOnStyle } from '../../theme/sharedStyles';
 import {

@@ -4,7 +4,7 @@ import ArchiveIcon from '@material-ui/icons/Archive';
 import ScheduleIcon from '@material-ui/icons/Schedule';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import { FlagsmithFeature, FlagsmithFeatureVersion, FlagsmithTag } from '../../api/FlagsmithClient';
-import { TagChip } from '../shared/TagChip';
+import { TagChip } from '../shared';
 import { flagsmithColors } from '../../theme/flagsmithTheme';
 import { detailCardStyle } from '../../theme/sharedStyles';
 import { getFlagType, getValueType, isDefined } from '../../utils/flagTypeHelpers';
