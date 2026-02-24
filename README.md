@@ -98,7 +98,10 @@ spec:
 1. Log in to your [Flagsmith dashboard](https://app.flagsmith.com)
 2. Go to **Organisation Settings** > **API Keys**
 3. Create or copy your **Admin API Key**
-4. Find your **Project ID** in the URL or project settings
+4. Find your **Project ID**:
+   - Navigate to your project
+   - Click on **Project Settings**
+   - The Project ID is shown in the JSON data as `"id"` (it's a number like `1`, not the UUID)
 
 ## Development
 
