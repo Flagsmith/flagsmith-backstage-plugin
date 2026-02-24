@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0](https://github.com/Flagsmith/flagsmith-backstage-plugin/compare/v0.2.1...v0.3.0) (2026-02-24)
+
+
+### Features
+
+* Remove org-id annotation requirement ([#22](https://github.com/Flagsmith/flagsmith-backstage-plugin/issues/22)) ([e15085f](https://github.com/Flagsmith/flagsmith-backstage-plugin/commit/e15085f1bdf239f785fe138bce475b9f044626a6))
+
+
+### Bug Fixes
+
+* **ui:** display tag labels instead of numeric IDs ([#18](https://github.com/Flagsmith/flagsmith-backstage-plugin/issues/18)) ([1a68d5c](https://github.com/Flagsmith/flagsmith-backstage-plugin/commit/1a68d5cffd93bc36661301d6bae40da22c8271d3))
+
 ## [0.2.1](https://github.com/Flagsmith/flagsmith-backstage-plugin/compare/v0.2.0...v0.2.1) (2026-02-06)
 
 
