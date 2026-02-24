@@ -20,14 +20,12 @@ export const FlagsmithUsageCard = () => {
   const { entity } = useEntity();
 
   const projectId = entity.metadata.annotations?.['flagsmith.com/project-id'];
-  const orgId = entity.metadata.annotations?.['flagsmith.com/org-id'];
 
-  const { project, usageData, totalFlags, loading, error } = useFlagsmithUsage(
-    projectId,
-    orgId,
-  );
+  const { project, usageData, totalFlags, loading, error } = useFlagsmithUsage(projectId);
 
-  const usageUrl = `${FLAGSMITH_DASHBOARD_URL}/organisation/${orgId}/usage`;
+  // Derive organization ID from project data for the dashboard link
+  const orgId = project?.organisation;
+  const usageUrl = orgId ? `${FLAGSMITH_DASHBOARD_URL}/organisation/${orgId}/usage` : undefined;
 
   if (loading) {
     return (
@@ -40,10 +38,7 @@ export const FlagsmithUsageCard = () => {
   if (error) {
     return (
       <InfoCard title="Flags Usage Data (30 Days)">
-        <ErrorState
-          message={error}
-          hint={!orgId ? 'Add a flagsmith.com/organization-id annotation to this entity.' : undefined}
-        />
+        <ErrorState message={error} />
       </InfoCard>
     );
   }
@@ -57,7 +52,7 @@ export const FlagsmithUsageCard = () => {
       title="Flags Usage Data (30 Days)"
       subheader={subheader}
       action={
-        orgId && (
+        usageUrl && (
           <Box className={classes.headerActions}>
             <FlagsmithLink href={usageUrl} iconOnly tooltip="View Usage Analytics" />
           </Box>

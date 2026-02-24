@@ -25,28 +25,29 @@ describe('useFlagsmithUsage', () => {
     jest.clearAllMocks();
   });
 
-  it('returns error when projectId or orgId is missing', async () => {
-    const { result } = renderHook(() => useFlagsmithUsage(undefined, '1'), { wrapper });
+  it('returns error when projectId is missing', async () => {
+    const { result } = renderHook(() => useFlagsmithUsage(undefined), { wrapper });
 
     await waitFor(() => expect(result.current.loading).toBe(false));
 
     expect(result.current.error).toContain('Missing Flagsmith project ID');
   });
 
-  it('fetches usage data and calculates totalFlags', async () => {
-    const mockProject = { id: 123, name: 'Test', organisation: 1 };
+  it('fetches usage data and derives orgId from project', async () => {
+    const mockProject = { id: 123, name: 'Test', organisation: 456 };
     const mockUsage = [{ flags: 100, day: '2024-01-01' }, { flags: 200, day: '2024-01-02' }];
 
     mockFetch
       .mockResolvedValueOnce({ ok: true, json: async () => mockProject })
       .mockResolvedValueOnce({ ok: true, json: async () => mockUsage });
 
-    const { result } = renderHook(() => useFlagsmithUsage('123', '1'), { wrapper });
+    const { result } = renderHook(() => useFlagsmithUsage('123'), { wrapper });
 
     await waitFor(() => expect(result.current.loading).toBe(false));
 
     expect(result.current.project).toEqual(mockProject);
     expect(result.current.usageData).toEqual(mockUsage);
     expect(result.current.totalFlags).toBe(300);
+    expect(result.current.error).toBeNull();
   });
 });

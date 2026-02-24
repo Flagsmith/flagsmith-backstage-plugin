@@ -16,7 +16,6 @@ export interface UseFlagsmithUsageResult {
 
 export function useFlagsmithUsage(
   projectId: string | undefined,
-  orgId: string | undefined,
 ): UseFlagsmithUsageResult {
   const discoveryApi = useApi(discoveryApiRef);
   const fetchApi = useApi(fetchApiRef);
@@ -33,19 +32,21 @@ export function useFlagsmithUsage(
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!projectId || !orgId) {
-      setError('Missing Flagsmith project ID or organization ID in entity annotations');
+    if (!projectId) {
+      setError('Missing Flagsmith project ID in entity annotations');
       setLoading(false);
       return;
     }
 
     const fetchData = async () => {
       try {
+        // Fetch project data to get the organization ID
         const projectData = await client.getProject(parseInt(projectId, 10));
         setProject(projectData);
 
+        // Derive organization ID from project data
         const usage = await client.getUsageData(
-          parseInt(orgId, 10),
+          projectData.organisation,
           parseInt(projectId, 10),
         );
         setUsageData(usage);
@@ -57,7 +58,7 @@ export function useFlagsmithUsage(
     };
 
     fetchData();
-  }, [projectId, orgId, client]);
+  }, [projectId, client]);
 
   const totalFlags = usageData.reduce((sum, day) => sum + (day.flags ?? 0), 0);
 
