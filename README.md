@@ -95,14 +95,11 @@ spec:
 
 ## Getting your Flagsmith credentials
 
-1. Log in to your [Flagsmith dashboard](https://app.flagsmith.com)
-2. Go to **Organisation Settings** > **API Keys**
-3. Create or copy your **Admin API Key**
-4. Find your **Project ID**:
-   - First, enable **Show JSON References** in your account settings (under the Developer section)
-   - Navigate to your project
-   - Click on **Project Settings**
-   - The Project ID is shown in the JSON data as `"id"` (it's a number like `1`, not the UUID)
+You'll need two pieces of information from Flagsmith:
+- **Admin API Key** - for authenticating API requests
+- **Project ID** - to identify which project's flags to display
+
+For detailed instructions on obtaining these credentials, see the [Backstage integration documentation](https://docs.flagsmith.com/third-party-integrations/backstage) in the official Flagsmith docs
 
 ## Development
 
