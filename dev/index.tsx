@@ -2,6 +2,7 @@ import { PropsWithChildren } from 'react';
 import { createDevApp } from '@backstage/dev-utils';
 import { EntityProvider } from '@backstage/plugin-catalog-react';
 import { Entity } from '@backstage/catalog-model';
+import { Box, Grid } from '@material-ui/core';
 import { setupWorker } from 'msw';
 import { FlagsTab } from '../src/components/FlagsTab';
 import { FlagsmithOverviewCard } from '../src/components/FlagsmithOverviewCard';
@@ -23,7 +24,6 @@ const mockEntity: Entity = {
     description: 'A demo service with Flagsmith feature flags integration',
     annotations: {
       'flagsmith.com/project-id': '31465',
-      'flagsmith.com/org-id': '24242',
     },
   },
   spec: {
@@ -63,5 +63,26 @@ createDevApp()
     ),
     title: 'Overview Cards',
     path: '/flagsmith-cards',
+  })
+  .addPage({
+    element: (
+      <EntityWrapper>
+        <Box p={3}>
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={6}>
+              <FlagsmithOverviewCard />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <FlagsmithUsageCard />
+            </Grid>
+          </Grid>
+          <Box mt={3}>
+            <FlagsTab />
+          </Box>
+        </Box>
+      </EntityWrapper>
+    ),
+    title: 'Complete View',
+    path: '/flagsmith-complete',
   })
   .render();
