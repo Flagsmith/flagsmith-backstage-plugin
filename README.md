@@ -86,18 +86,19 @@ metadata:
   name: my-service
   annotations:
     flagsmith.com/project-id: '12345'
-    flagsmith.com/org-id: '67890' # Optional - defaults to first organization
 spec:
   type: service
   owner: team-a
 ```
+
+> **Note:** The organization ID is automatically derived from the project data.
 
 ## Getting your Flagsmith credentials
 
 1. Log in to your [Flagsmith dashboard](https://app.flagsmith.com)
 2. Go to **Organisation Settings** > **API Keys**
 3. Create or copy your **Admin API Key**
-4. Find your **Project ID** and **Organisation ID** in the URL or project settings
+4. Find your **Project ID** in the URL or project settings
 
 ## Development
 
