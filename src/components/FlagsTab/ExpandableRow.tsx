@@ -19,8 +19,9 @@ import {
   FlagsmithEnvironment,
   FlagsmithFeature,
   FlagsmithFeatureDetails,
+  FlagsmithTag,
 } from '../../api/FlagsmithClient';
-import { FlagsmithLink } from '../shared';
+import { FlagsmithLink, TagChip } from '../shared';
 import { buildFlagUrl } from '../../theme/flagsmithTheme';
 import { switchOnStyle } from '../../theme/sharedStyles';
 import {
@@ -78,13 +79,14 @@ const TRAILING_COLUMNS_COUNT = 1;
 interface ExpandableRowProps {
   feature: FlagsmithFeature;
   environments: FlagsmithEnvironment[];
+  tagMap: Map<number, FlagsmithTag>;
   client: FlagsmithClient;
   projectId: string;
   orgId: number;
 }
 
 export const ExpandableRow = memo(
-  ({ feature, environments, client, projectId, orgId }: ExpandableRowProps) => {
+  ({ feature, environments, tagMap, client, projectId, orgId }: ExpandableRowProps) => {
     const classes = useStyles();
     const [open, setOpen] = useState(false);
     const [details, setDetails] = useState<FlagsmithFeatureDetails | null>(null);
@@ -165,14 +167,8 @@ export const ExpandableRow = memo(
           </TableCell>
           <TableCell className={classes.tagsCell}>
             <Box className={classes.tagsContainer}>
-              {displayTags.map((tag, index) => (
-                <Chip
-                  key={index}
-                  label={tag}
-                  size="small"
-                  variant="outlined"
-                  className={classes.tagChip}
-                />
+              {displayTags.map((tagId, index) => (
+                <TagChip key={index} tagId={tagId} tagMap={tagMap} />
               ))}
               {remainingTagsCount > 0 && (
                 <Chip
@@ -239,6 +235,7 @@ export const ExpandableRow = memo(
 
                     <FeatureDetailsGrid
                       feature={feature}
+                      tagMap={tagMap}
                       liveVersion={liveVersion}
                       segmentOverrides={segmentOverrides}
                       scheduledVersion={scheduledVersion}

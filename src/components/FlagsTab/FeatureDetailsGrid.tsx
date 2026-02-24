@@ -3,7 +3,8 @@ import { makeStyles } from '@material-ui/core/styles';
 import ArchiveIcon from '@material-ui/icons/Archive';
 import ScheduleIcon from '@material-ui/icons/Schedule';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
-import { FlagsmithFeature, FlagsmithFeatureVersion } from '../../api/FlagsmithClient';
+import { FlagsmithFeature, FlagsmithFeatureVersion, FlagsmithTag } from '../../api/FlagsmithClient';
+import { TagChip } from '../shared';
 import { flagsmithColors } from '../../theme/flagsmithTheme';
 import { detailCardStyle } from '../../theme/sharedStyles';
 import { getFlagType, getValueType, isDefined } from '../../utils/flagTypeHelpers';
@@ -51,6 +52,7 @@ type LiveVersionInfo = FlagsmithFeature['live_version'];
 
 interface FeatureDetailsGridProps {
   feature: FlagsmithFeature;
+  tagMap: Map<number, FlagsmithTag>;
   liveVersion: LiveVersionInfo;
   segmentOverrides: number;
   scheduledVersion?: FlagsmithFeatureVersion | null;
@@ -69,6 +71,7 @@ const getCreatorDisplayName = (feature: FlagsmithFeature): string => {
 
 export const FeatureDetailsGrid = ({
   feature,
+  tagMap,
   liveVersion,
   segmentOverrides,
   scheduledVersion,
@@ -207,8 +210,8 @@ export const FeatureDetailsGrid = ({
             Tags
           </Typography>
           <Box className={classes.tagsContainer}>
-            {feature.tags.map((tag, index) => (
-              <Chip key={index} label={tag} size="small" variant="outlined" />
+            {feature.tags.map((tagId, index) => (
+              <TagChip key={index} tagId={tagId} tagMap={tagMap} />
             ))}
           </Box>
         </Grid>

@@ -32,23 +32,54 @@ const mockEnvironments = [
   },
 ];
 
+// Mock tags for the project
+const mockTags = [
+  { id: 1, label: 'ui', color: '#2196F3' },
+  { id: 2, label: 'theme', color: '#9C27B0' },
+  { id: 3, label: 'checkout', color: '#4CAF50' },
+  { id: 4, label: 'experiment', color: '#FF9800' },
+  { id: 5, label: 'api', color: '#F44336' },
+  { id: 6, label: 'performance', color: '#00BCD4' },
+  { id: 7, label: 'beta', color: '#E91E63' },
+  { id: 8, label: 'ops', color: '#795548' },
+  { id: 9, label: 'notifications', color: '#607D8B' },
+  { id: 10, label: 'v2', color: '#3F51B5' },
+  { id: 11, label: 'payments', color: '#8BC34A' },
+  { id: 12, label: 'integration', color: '#FFEB3B' },
+  { id: 13, label: 'cache', color: '#009688' },
+  { id: 14, label: 'analytics', color: '#673AB7' },
+  { id: 15, label: 'onboarding', color: '#CDDC39' },
+  { id: 16, label: 'ux', color: '#FF5722' },
+  { id: 17, label: 'search', color: '#03A9F4' },
+  { id: 18, label: 'v3', color: '#FFC107' },
+  { id: 19, label: 'ai', color: '#9E9E9E' },
+  { id: 20, label: 'recommendations', color: '#00E676' },
+  { id: 21, label: 'export', color: '#651FFF' },
+  { id: 22, label: 'bulk', color: '#1DE9B6' },
+  { id: 23, label: 'admin', color: '#D500F9' },
+  { id: 24, label: 'security', color: '#C51162' },
+  { id: 25, label: 'audit', color: '#304FFE' },
+  { id: 26, label: 'unique', color: '#64DD17' },
+  { id: 27, label: 'page2', color: '#FFAB00' },
+];
+
 // Feature name templates for generating mock data
 const featureTemplates = [
-  { name: 'dark_mode', desc: 'Enable dark mode theme for the application', tags: ['ui', 'theme'], type: 'FLAG' },
-  { name: 'new_checkout_flow', desc: 'A/B test for the new checkout experience', tags: ['checkout', 'experiment'], type: 'FLAG' },
-  { name: 'api_rate_limit', desc: 'API rate limiting configuration', tags: ['api', 'performance'], type: 'CONFIG' },
-  { name: 'beta_features', desc: 'Enable beta features for selected users', tags: ['beta'], type: 'FLAG' },
-  { name: 'maintenance_mode', desc: 'Put the application in maintenance mode', tags: ['ops'], type: 'FLAG' },
-  { name: 'notifications_v2', desc: 'New notification system', tags: ['notifications', 'v2'], type: 'FLAG' },
-  { name: 'payment_gateway', desc: 'Enable new payment gateway integration', tags: ['payments', 'integration'], type: 'FLAG' },
-  { name: 'cache_ttl', desc: 'Cache time-to-live configuration', tags: ['cache', 'performance'], type: 'CONFIG' },
-  { name: 'feature_analytics', desc: 'Track feature usage analytics', tags: ['analytics'], type: 'FLAG' },
-  { name: 'user_onboarding', desc: 'New user onboarding flow', tags: ['onboarding', 'ux'], type: 'FLAG' },
-  { name: 'search_v3', desc: 'Enhanced search functionality', tags: ['search', 'v3'], type: 'FLAG' },
-  { name: 'recommendation_engine', desc: 'AI-powered recommendations', tags: ['ai', 'recommendations'], type: 'FLAG' },
-  { name: 'export_csv', desc: 'Enable CSV export functionality', tags: ['export'], type: 'FLAG' },
-  { name: 'bulk_operations', desc: 'Enable bulk edit operations', tags: ['bulk', 'admin'], type: 'FLAG' },
-  { name: 'audit_logging', desc: 'Enhanced audit logging', tags: ['security', 'audit'], type: 'FLAG' },
+  { name: 'dark_mode', desc: 'Enable dark mode theme for the application', tags: [1, 2], type: 'FLAG' },
+  { name: 'new_checkout_flow', desc: 'A/B test for the new checkout experience', tags: [3, 4], type: 'FLAG' },
+  { name: 'api_rate_limit', desc: 'API rate limiting configuration', tags: [5, 6], type: 'CONFIG' },
+  { name: 'beta_features', desc: 'Enable beta features for selected users', tags: [7], type: 'FLAG' },
+  { name: 'maintenance_mode', desc: 'Put the application in maintenance mode', tags: [8], type: 'FLAG' },
+  { name: 'notifications_v2', desc: 'New notification system', tags: [9, 10], type: 'FLAG' },
+  { name: 'payment_gateway', desc: 'Enable new payment gateway integration', tags: [11, 12], type: 'FLAG' },
+  { name: 'cache_ttl', desc: 'Cache time-to-live configuration', tags: [13, 6], type: 'CONFIG' },
+  { name: 'feature_analytics', desc: 'Track feature usage analytics', tags: [14], type: 'FLAG' },
+  { name: 'user_onboarding', desc: 'New user onboarding flow', tags: [15, 16], type: 'FLAG' },
+  { name: 'search_v3', desc: 'Enhanced search functionality', tags: [17, 18], type: 'FLAG' },
+  { name: 'recommendation_engine', desc: 'AI-powered recommendations', tags: [19, 20], type: 'FLAG' },
+  { name: 'export_csv', desc: 'Enable CSV export functionality', tags: [21], type: 'FLAG' },
+  { name: 'bulk_operations', desc: 'Enable bulk edit operations', tags: [22, 23], type: 'FLAG' },
+  { name: 'audit_logging', desc: 'Enhanced audit logging', tags: [24, 25], type: 'FLAG' },
 ];
 
 // Generate 55 mock features
@@ -108,7 +139,7 @@ const generateMockFeatures = () => {
     type: 'FLAG',
     is_archived: false,
     is_server_key_only: false,
-    tags: ['unique', 'page2'],
+    tags: [26, 27],
     owners: [{ id: 2, name: 'Jane Smith', email: 'jane@example.com' }],
     num_segment_overrides: 1,
     num_identity_overrides: 3,
@@ -300,6 +331,11 @@ export const handlers = [
   // Get project environments
   rest.get('*/proxy/flagsmith/projects/:projectId/environments/', (req, res, ctx) => {
     return res(ctx.json({ results: mockEnvironments }));
+  }),
+
+  // Get project tags
+  rest.get('*/proxy/flagsmith/projects/:projectId/tags/', (req, res, ctx) => {
+    return res(ctx.json({ results: mockTags }));
   }),
 
   // Get project features

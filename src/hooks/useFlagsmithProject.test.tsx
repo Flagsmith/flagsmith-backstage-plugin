@@ -36,12 +36,14 @@ describe('useFlagsmithProject', () => {
   it('fetches project data successfully', async () => {
     const mockProject = { id: 123, name: 'Test', organisation: 1 };
     const mockEnvs = [{ id: 1, name: 'Dev', api_key: 'key', project: 123 }];
-    const mockFeatures = [{ id: 1, name: 'flag', created_date: '2024-01-01', project: 123 }];
+    const mockFeatures = [{ id: 1, name: 'flag', created_date: '2024-01-01', project: 123, tags: [1] }];
+    const mockTags = [{ id: 1, label: 'ui', color: '#2196F3' }];
 
     mockFetch
       .mockResolvedValueOnce({ ok: true, json: async () => mockProject })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ results: mockEnvs }) })
-      .mockResolvedValueOnce({ ok: true, json: async () => ({ results: mockFeatures }) });
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ results: mockFeatures }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ results: mockTags }) });
 
     const { result } = renderHook(() => useFlagsmithProject('123'), { wrapper });
 
@@ -51,5 +53,6 @@ describe('useFlagsmithProject', () => {
     expect(result.current.project).toEqual(mockProject);
     expect(result.current.environments).toEqual(mockEnvs);
     expect(result.current.features).toEqual(mockFeatures);
+    expect(result.current.tagMap.get(1)).toEqual(mockTags[0]);
   });
 });
